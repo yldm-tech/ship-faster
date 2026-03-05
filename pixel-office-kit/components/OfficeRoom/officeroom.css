@@ -464,6 +464,17 @@
   filter: brightness(1.3);
 }
 
+.or-monitor-think {
+  box-shadow: 0 0 10px rgba(167, 139, 250, 0.5), 0 0 20px rgba(167, 139, 250, 0.2);
+  filter: brightness(1.1) hue-rotate(200deg);
+  animation: or-think-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes or-think-pulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(167, 139, 250, 0.4); }
+  50%       { box-shadow: 0 0 14px rgba(167, 139, 250, 0.7), 0 0 28px rgba(139, 92, 246, 0.3); }
+}
+
 .or-steam {
   position: absolute;
   pointer-events: none;

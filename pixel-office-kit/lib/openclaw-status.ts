@@ -55,6 +55,20 @@ export function inferFromFile(file: string | undefined, ageMs: number): { action
     return { action: ageMs < DEEPFOCUS_THRESHOLD_MS ? 'deepfocus' : 'work', msg: '写代码中...' };
   if (/\.(sh|bash|zsh)$/.test(base))
     return { action: ageMs < DEEPFOCUS_THRESHOLD_MS ? 'deepfocus' : 'work', msg: '跑脚本中...' };
+  if (/\.(css|scss|sass|less|styl)$/.test(base))
+    return { action: ageMs < DEEPFOCUS_THRESHOLD_MS ? 'deepfocus' : 'work', msg: '调样式中...' };
+  if (/\.svg$/.test(base))
+    return { action: 'work', msg: '绘制图标中...' };
+  if (base === 'dockerfile' || base.startsWith('dockerfile.'))
+    return { action: ageMs < DEEPFOCUS_THRESHOLD_MS ? 'deepfocus' : 'work', msg: '容器化中...' };
+  if (base.startsWith('docker-compose'))
+    return { action: 'work', msg: '调容器编排中...' };
+  if (/\.(tf|hcl)$/.test(base))
+    return { action: ageMs < DEEPFOCUS_THRESHOLD_MS ? 'deepfocus' : 'work', msg: '写基础设施中...' };
+  if (/\.sql$/.test(base))
+    return { action: ageMs < DEEPFOCUS_THRESHOLD_MS ? 'deepfocus' : 'work', msg: '写 SQL 中...' };
+  if (/\.proto$/.test(base))
+    return { action: 'work', msg: '设计接口协议中...' };
   if (/\.(md|mdx)$/.test(base))
     return { action: 'work', msg: '写文档中...' };
   if (/\.(json|yaml|yml|toml|env|cfg|conf)$/.test(base))

@@ -163,7 +163,8 @@ function drawZoneDivider(ctx: CanvasRenderingContext2D, h: number): void {
 function drawDesks(ctx: CanvasRenderingContext2D, agents: AgentEntity[], time: number): void {
   for (const ws of WORKSTATIONS) {
     const agent = agents.find(a => a.id === ws.agentId);
-    const isActive = agent && (agent.state === 'work' || agent.state === 'deepfocus');
+    const isActive = agent && (agent.state === 'work' || agent.state === 'deepfocus' || agent.state === 'think');
+    const isThinking = agent?.state === 'think';
 
     const deskX = ws.deskCols[0] * TILE_SIZE;
     const deskY = ws.deskRows[0] * TILE_SIZE;
@@ -190,7 +191,17 @@ function drawDesks(ctx: CanvasRenderingContext2D, agents: AgentEntity[], time: n
     ctx.fillStyle = hexColorAlpha(ws.color, glowAlpha);
     ctx.fillRect(monX + 1, monY + 3, TILE_SIZE - 2, TILE_SIZE * 2 - 6);
 
-    if (isActive) {
+    if (isThinking) {
+      // 思考状态：紫色脉冲点阵
+      const dotColors = ['#a78bfa', '#c4b5fd', '#818cf8'];
+      for (let j = 0; j < 3; j++) {
+        for (let k = 0; k < 3; k++) {
+          ctx.fillStyle = dotColors[(j + k) % 3];
+          ctx.fillRect(monX + 3 + k * 5, monY + 5 + j * 6, 3, 2);
+        }
+      }
+    } else if (isActive) {
+      // 工作/专注状态：代码行
       const lineColors = ['#4ade80', '#fbbf24', ws.color];
       for (let j = 0; j < 3; j++) {
         ctx.fillStyle = lineColors[j];
@@ -210,8 +221,16 @@ function drawDesks(ctx: CanvasRenderingContext2D, agents: AgentEntity[], time: n
 }
 
 function drawDeskItems(ctx: CanvasRenderingContext2D, _agentId: string, dx: number, dy: number, color: string): void {
+  // 便签纸（右侧）
+  ctx.fillStyle = '#2a3040';
+  ctx.fillRect(dx + TILE_SIZE - 9, dy + 3, 6, 5);
+  ctx.fillStyle = 'rgba(255,255,255,0.08)';
+  ctx.fillRect(dx + TILE_SIZE - 9, dy + 3, 6, 1);
+  // agent 主题色小物（左侧：马克杯）
   ctx.fillStyle = color;
-  ctx.fillRect(dx + 3, dy + 2, 3, 3);
+  ctx.fillRect(dx + 3, dy + 3, 4, 3);
+  ctx.fillStyle = hexColorAlpha(color, 0.4);
+  ctx.fillRect(dx + 4, dy + 6, 2, 1);
 }
 
 function drawWhiteboard(ctx: CanvasRenderingContext2D): void {
@@ -220,10 +239,47 @@ function drawWhiteboard(ctx: CanvasRenderingContext2D): void {
   const w = 3 * TILE_SIZE;
   const h = 2 * TILE_SIZE;
 
+  // 边框
   ctx.fillStyle = '#1a1a1a';
   ctx.fillRect(x - 2, y - 2, w + 4, h + 4);
   ctx.fillStyle = '#0a1820';
   ctx.fillRect(x, y, w, h);
+
+  // 标题行：蓝色文字像素块
+  ctx.fillStyle = 'rgba(0,200,255,0.6)';
+  for (let i = 0; i < 4; i++) ctx.fillRect(x + 3 + i * 4, y + 3, 3, 2);
+
+  // 三行任务条目（用 ✓ 和短横条模拟）
+  const taskColors = ['rgba(74,222,128,0.7)', 'rgba(74,222,128,0.7)', 'rgba(251,191,36,0.6)', 'rgba(148,163,184,0.4)'];
+  const taskDone  = [true, true, false, false];
+  for (let i = 0; i < 4; i++) {
+    const ty = y + 8 + i * 5;
+    if (taskDone[i]) {
+      // ✓ 勾
+      ctx.fillStyle = taskColors[i];
+      ctx.fillRect(x + 3, ty, 2, 1);
+      ctx.fillRect(x + 4, ty + 1, 2, 1);
+    } else {
+      // ○ 空圆点
+      ctx.fillStyle = taskColors[i];
+      ctx.fillRect(x + 3, ty, 2, 1);
+      ctx.fillRect(x + 3, ty + 2, 2, 1);
+      ctx.fillRect(x + 2, ty + 1, 1, 1);
+      ctx.fillRect(x + 5, ty + 1, 1, 1);
+    }
+    // 任务标签横线
+    ctx.fillStyle = taskColors[i];
+    ctx.fillRect(x + 7, ty + 1, 8 - (i % 2) * 2, 1);
+  }
+
+  // 右侧：小型图表竖条
+  const barH = [6, 9, 5, 8, 7];
+  for (let i = 0; i < barH.length; i++) {
+    ctx.fillStyle = i % 2 === 0 ? 'rgba(0,200,255,0.35)' : 'rgba(99,102,241,0.35)';
+    ctx.fillRect(x + w - 18 + i * 3, y + h - 3 - barH[i], 2, barH[i]);
+  }
+
+  // 发光边框
   ctx.fillStyle = 'rgba(0,200,255,0.15)';
   ctx.fillRect(x, y, w, 1);
   ctx.fillRect(x, y + h - 1, w, 1);

@@ -253,15 +253,16 @@ export function OfficeRoom({
             const agent = domAgents.find(a => a.id === cfg.id);
             const ws = WORKSTATIONS.find(w => w.agentId === cfg.id);
             if (!ws) return null;
-            const isAtDesk = agent?.state === 'work' || agent?.state === 'deepfocus';
+            const isAtDesk = agent?.state === 'work' || agent?.state === 'deepfocus' || agent?.state === 'think';
             const isFocus = agent?.state === 'deepfocus';
+            const isThinking = agent?.state === 'think';
             const monX = ws.seatCol * TILE_SIZE - 2;
             const monY = (ws.deskRows[0] - 1) * TILE_SIZE + 6;
             const monH = TILE_SIZE + 8;
             return (
               <div
                 key={`mon-${cfg.id}`}
-                className={`or-monitor-screen ${isAtDesk ? 'or-monitor-active' : 'or-monitor-idle'} ${isFocus ? 'or-monitor-focus' : ''}`}
+                className={`or-monitor-screen ${isAtDesk ? 'or-monitor-active' : 'or-monitor-idle'} ${isFocus ? 'or-monitor-focus' : ''} ${isThinking ? 'or-monitor-think' : ''}`}
                 style={{
                   left: monX * SCALE,
                   top: (monY + 2) * SCALE,
