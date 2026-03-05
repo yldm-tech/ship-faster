@@ -14,6 +14,7 @@ export const AGENTS: AgentDef[] = [
   { id: 'lyra',  name: 'Lyra',  avatar: '/avatars/lyra.svg',  color: '#22c55e', workStyle: 'methodical', role: 'QA 工程师'  },
   { id: 'emma',  name: 'Emma',  avatar: '/avatars/emma.svg',  color: '#3b82f6', workStyle: 'rapid-fire', role: '部署工程师'  },
   { id: 'zeph',  name: 'Zeph',  avatar: '/avatars/zeph.svg',  color: '#eab308', workStyle: 'watchful',   role: '架构师'     },
+  { id: 'nova',  name: 'Nova',  avatar: '/avatars/nova.svg',  color: '#f43f5e', workStyle: 'creative',   role: 'UI/UX 设计师' },
 ];
 
 export const WORK_MSGS: Record<string, string[]> = {
@@ -23,6 +24,7 @@ export const WORK_MSGS: Record<string, string[]> = {
   lyra:  ['运行测试套件...', '发现边界 case', '编写测试计划', '验证修复结果'],
   emma:  ['推送到 Vercel...', 'GitHub Actions 运行中', '执行部署清单', '预览链接就绪'],
   zeph:  ['设计数据库 Schema...', '进行架构评审', '技术选型讨论', '定义 API 边界'],
+  nova:  ['绘制 Wireframe...', '打磨交互细节', '设计组件规范', '产出视觉稿'],
 };
 
 export const PERSONALITY_BANTER: Record<string, string[]> = {
@@ -32,6 +34,7 @@ export const PERSONALITY_BANTER: Record<string, string[]> = {
   lyra:  ['发现了回归问题', '边界场景分析', '测试覆盖率提升了', '质量门禁通过'],
   emma:  ['部署成功上线', '预览地址已激活', '零停机部署完成', 'CI 全部通过 ✓'],
   zeph:  ['架构决策完成', 'Next.js 15 迁移中', '服务端组件边界明确', '数据模型稳固'],
+  nova:  ['设计语言统一', '组件库更新了', '视觉稿通过评审', '动效方案确定'],
 };
 
 export const COFFEE_MSGS: string[] = ['☕ 啊...', '喝杯咖啡！', '需要补充咖啡因', '续命中...'];
@@ -43,6 +46,7 @@ export const CELEBRATE_MSGS: Record<string, string[]> = {
   lyra:  ['全部测试通过！', '零回归问题！', '质量 A+！'],
   emma:  ['已上生产！', '部署完成！', '链接可访问！'],
   zeph:  ['架构通过审批！', 'Schema 稳了！', '设计完成！'],
+  nova:  ['设计稿超美！', '交互流畅！', '视觉效果拉满！'],
 };
 
 export const LOUNGE_MSGS: Record<string, string[]> = {
@@ -52,4 +56,5 @@ export const LOUNGE_MSGS: Record<string, string[]> = {
   lyra:  ['思考边界条件...', '代码审查模式', '有序地休息中'],
   emma:  ['看部署日志', '检查 CI 状态', '流水线空闲中'],
   zeph:  ['系统性思考...', '草画架构图', '深度设计模式'],
+  nova:  ['刷设计案例找灵感', '沉浸在色彩里', '漫无目的地美化'],
 };
