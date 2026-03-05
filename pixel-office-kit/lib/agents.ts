@@ -4,15 +4,16 @@ export interface AgentDef {
   avatar: string;
   color: string;
   workStyle: string;
+  role: string;
 }
 
 export const AGENTS: AgentDef[] = [
-  { id: 'aria',  name: 'Aria',  avatar: '/avatars/aria.svg',  color: '#a855f7', workStyle: 'commanding'  },
-  { id: 'neon',  name: 'Neon',  avatar: '/avatars/neon.svg',  color: '#06b6d4', workStyle: 'artistic'    },
-  { id: 'rex',   name: 'Rex',   avatar: '/avatars/rex.svg',   color: '#f97316', workStyle: 'impulsive'   },
-  { id: 'lyra',  name: 'Lyra',  avatar: '/avatars/lyra.svg',  color: '#22c55e', workStyle: 'methodical'  },
-  { id: 'emma',  name: 'Emma',  avatar: '/avatars/emma.svg',  color: '#3b82f6', workStyle: 'rapid-fire'  },
-  { id: 'zeph',  name: 'Zeph',  avatar: '/avatars/zeph.svg',  color: '#eab308', workStyle: 'watchful'    },
+  { id: 'aria',  name: 'Aria',  avatar: '/avatars/aria.svg',  color: '#a855f7', workStyle: 'commanding', role: '产品经理'   },
+  { id: 'neon',  name: 'Neon',  avatar: '/avatars/neon.svg',  color: '#06b6d4', workStyle: 'artistic',   role: '前端工程师'  },
+  { id: 'rex',   name: 'Rex',   avatar: '/avatars/rex.svg',   color: '#f97316', workStyle: 'impulsive',  role: 'DevOps'    },
+  { id: 'lyra',  name: 'Lyra',  avatar: '/avatars/lyra.svg',  color: '#22c55e', workStyle: 'methodical', role: 'QA 工程师'  },
+  { id: 'emma',  name: 'Emma',  avatar: '/avatars/emma.svg',  color: '#3b82f6', workStyle: 'rapid-fire', role: '部署工程师'  },
+  { id: 'zeph',  name: 'Zeph',  avatar: '/avatars/zeph.svg',  color: '#eab308', workStyle: 'watchful',   role: '架构师'     },
 ];
 
 export const WORK_MSGS: Record<string, string[]> = {
