@@ -51,7 +51,7 @@ function inferAction(updatedAtMs: number, initOnly?: boolean): string {
 }
 
 export function DemoShell() {
-  const { commands: realCommands, rawStatus, isConnected } = useOpenclawStatus();
+  const { commands: realCommands, rawStatus, isConnected, isLoading } = useOpenclawStatus();
   const [manualCommands, setManualCommands] = useState<AgentCommand[]>([]);
   const [activeCmd, setActiveCmd] = useState<{ agentId: string; action: string } | null>(null);
   const activeCmdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -147,12 +147,12 @@ export function DemoShell() {
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
           <span style={{
             padding: '3px 10px', borderRadius: 20,
-            background: isConnected ? '#052e16' : '#1c1917',
-            color: isConnected ? '#4ade80' : '#ef4444',
+            background: isLoading ? '#0f172a' : isConnected ? '#052e16' : '#1c1917',
+            color: isLoading ? '#64748b' : isConnected ? '#4ade80' : '#ef4444',
             fontSize: 10, fontWeight: 700,
-            border: `1px solid ${isConnected ? '#166534' : '#7f1d1d'}`,
+            border: `1px solid ${isLoading ? '#1e293b' : isConnected ? '#166534' : '#7f1d1d'}`,
           }}>
-            {isConnected ? '● 已连接' : '● 未连接'}
+            {isLoading ? '○ 连接中' : isConnected ? '● 已连接' : '● 未连接'}
           </span>
           <span style={{
             padding: '3px 10px', borderRadius: 20,
@@ -164,8 +164,8 @@ export function DemoShell() {
         </div>
       </div>
 
-      {/* ── 未连接提示 ── */}
-      {!isConnected && (
+      {/* ── 未连接提示（首次加载完成后才显示） ── */}
+      {!isLoading && !isConnected && (
         <div style={{
           marginBottom: 16, padding: '12px 16px', borderRadius: 10,
           background: '#1c0a00', border: '1px solid #7c2d12', color: '#fb923c', fontSize: 12,
@@ -177,9 +177,9 @@ export function DemoShell() {
       {/* ── Stats bar ── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 16 }}>
         {[
-          { label: '当前活跃', value: isConnected ? `${activeCount} / ${AGENTS.length}` : '—', sub: '名 Agent 工作中（10 分钟内）' },
+          { label: '当前活跃', value: isLoading ? '…' : isConnected ? `${activeCount} / ${AGENTS.length}` : '—', sub: '名 Agent 工作中（10 分钟内）' },
           { label: '状态切换', value: String(eventCount), sub: '次状态变化已记录' },
-          { label: '轮询间隔', value: '30s', sub: isConnected ? 'stage.yldm.tech/status' : '等待连接...' },
+          { label: '轮询间隔', value: '30s', sub: isLoading ? '连接中...' : isConnected ? 'stage.yldm.tech/status' : '等待连接...' },
         ].map(stat => (
           <div key={stat.label} style={{
             background: '#0f172a', border: '1px solid #1e293b', borderRadius: 10, padding: '12px 16px',
@@ -266,7 +266,7 @@ export function DemoShell() {
                   </div>
 
                   <div style={{ color: '#334155', fontSize: 10, minHeight: 14 }}>
-                    {s?.initOnly ? '未启动' : s ? timeAgo(s.updatedAtMs) : (isConnected ? '暂无数据' : '未连接')}
+                    {s?.initOnly ? '未启动' : s ? timeAgo(s.updatedAtMs) : (isLoading ? '...' : isConnected ? '暂无数据' : '未连接')}
                   </div>
                   {s?.file && !s.initOnly && (
                     <div style={{
@@ -293,7 +293,7 @@ export function DemoShell() {
           }}>
             {activityLog.length === 0 ? (
               <div style={{ color: '#1e293b', fontSize: 11, textAlign: 'center', paddingTop: 70 }}>
-                {isConnected ? '等待状态变化...' : '未连接'}
+                {isLoading ? '连接中...' : isConnected ? '等待状态变化...' : '未连接'}
               </div>
             ) : activityLog.map(entry => {
               const agent = AGENTS.find(a => a.id === entry.agentId);
