@@ -127,6 +127,13 @@ export function DemoShell() {
     return () => { if (activeCmdTimerRef.current) clearTimeout(activeCmdTimerRef.current); };
   }, []);
 
+  // 每 60s 强制重渲染，让"刚刚/X分钟前"等时间显示保持实时
+  const [, setTimeTick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setTimeTick(t => t + 1), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
   // isLoading 期间让所有 agent 坐着等待，避免首次 poll 前随机乱跑
   const loadingIdleCmds = isLoading
     ? AGENTS.map(a => ({ agentId: a.id, action: 'idle' as const, message: '' }))
@@ -139,9 +146,11 @@ export function DemoShell() {
   const activeCount = rawStatus
     ? AGENTS.filter(a => {
         const s = rawStatus[a.id];
-        return s && !s.initOnly && Date.now() - s.updatedAtMs < 10 * 60 * 1000;
+        return s && !s.initOnly && Date.now() - s.updatedAtMs < ACTIVE_THRESHOLD_MS;
       }).length
     : 0;
+  // 活跃 agent 越多，办公室越热闹（每人贡献 4 点，最低 2）
+  const officeActivityLevel = Math.max(2, activeCount * 4);
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 16px', fontFamily: 'ui-monospace, monospace' }}>
@@ -210,7 +219,7 @@ export function DemoShell() {
         <OfficeRoom
           agents={AGENTS}
           isActive={true}
-          activityLevel={10}
+          activityLevel={officeActivityLevel}
           agentCommands={officeCommands}
           workMsgs={WORK_MSGS}
           personalityBanter={PERSONALITY_BANTER}

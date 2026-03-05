@@ -66,7 +66,7 @@ export function tickMovement(agent: AgentEntity, dtMs: number): void {
       agent.moveToRow = next.row;
       agent.direction = calcDir(next.col - agent.tileCol, next.row - agent.tileRow);
     } else {
-      agent.charPhase = agent.arriveState === 'work' || agent.arriveState === 'deepfocus' ? 'sit' : 'stand';
+      agent.charPhase = (agent.arriveState === 'work' || agent.arriveState === 'deepfocus' || agent.arriveState === 'think') ? 'sit' : 'stand';
       if (agent.arriveState) {
         agent.state = agent.arriveState;
       }
@@ -96,7 +96,7 @@ export function tickTypeAnimation(agent: AgentEntity, dtMs: number): void {
 }
 
 function updateSitOffset(agent: AgentEntity): void {
-  const sitStates: OfficeAgentState[] = ['work', 'deepfocus', 'slack'];
+  const sitStates: OfficeAgentState[] = ['work', 'deepfocus', 'slack', 'think'];
   agent.sitOffsetY = sitStates.includes(agent.state) && agent.pathQueue.length === 0 ? SIT_OFFSET_Y : 0;
 }
 
@@ -284,6 +284,14 @@ export function tickBehavior(
         agent.talkingTo = null;
         agent.emotion = null;
         agent.dwellUntil = Date.now() + 1500;
+      } else if (cmd.action === 'think') {
+        const moved = navigateToSeat(agent, walkable, 'think');
+        if (moved || !agent.message) {
+          agent.message = cmd.message?.slice(0, 30) ?? '深度思考中...';
+        }
+        agent.talkingTo = null;
+        agent.emotion = 'thinking';
+        agent.dwellUntil = Date.now() + 1500;
       } else if (cmd.action === 'idle') {
         // idle/待命中 agent：回座位静坐，不参与随机行为
         navigateToSeat(agent, walkable, 'idle');
@@ -324,7 +332,7 @@ export function tickBehavior(
         agent.state = cmd.action;
         agent.arriveState = cmd.action;
         agent.message = cmd.message?.slice(0, 30) ?? null;
-        agent.emotion = cmd.action === 'think' ? 'thinking' : null;
+        agent.emotion = null;
         agent.talkingTo = null;
         agent.dwellUntil = Date.now() + 1000;
       }
@@ -337,7 +345,7 @@ export function tickBehavior(
   }
 
   // 有真实工作状态命令的 agent，极大降低随机行为触发频率（主要待在工作台）
-  const hasWorkCmd = cmd && (cmd.action === 'work' || cmd.action === 'deepfocus');
+  const hasWorkCmd = cmd && (cmd.action === 'work' || cmd.action === 'deepfocus' || cmd.action === 'think');
   const tempo = hasWorkCmd
     ? 0.00008  // ~0.13%/sec at 60fps，约每 12 秒一次随机行为
     : (activityLevel > 20 ? 0.0020 : activityLevel > 5 ? 0.0010 : 0.0005);

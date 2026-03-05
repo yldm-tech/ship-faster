@@ -75,7 +75,11 @@ function statusToCommand(agentId: string, updatedAtMs: number, file?: string): A
     if (age >= ACTIVE_THRESHOLD_MS) {
       return { agentId, action: 'lounge', message: pick(LOUNGE_MSGS[agentId] ?? ['休息中...']) };
     }
-    return { agentId, action: fromFile.action as AgentCommand['action'], message: fromFile.msg };
+    // think 状态保留文件路径描述；work/deepfocus 用 agent 个性化消息
+    const msg = fromFile.action === 'think'
+      ? fromFile.msg
+      : pick(WORK_MSGS[agentId] ?? [fromFile.msg]);
+    return { agentId, action: fromFile.action as AgentCommand['action'], message: msg };
   }
 
   // 纯时间推断（文件无法识别）
