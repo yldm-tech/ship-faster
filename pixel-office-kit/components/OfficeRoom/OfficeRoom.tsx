@@ -110,10 +110,9 @@ export function OfficeRoom({
     bodySpritesRef.current = sprites;
 
     const entities: AgentEntity[] = [];
-    const usedStations = WORKSTATIONS.slice(0, agentsDef.length);
-    for (let i = 0; i < agentsDef.length; i++) {
-      const def = agentsDef[i];
-      const ws = usedStations[i];
+    for (const def of agentsDef) {
+      const ws = WORKSTATIONS.find(w => w.agentId === def.id);
+      if (!ws) continue;
       const entity = createAgentEntity(
         def.id, def.name, def.color, def.avatar,
         ws.seatCol, ws.seatRow, ws.seatPx,
@@ -144,10 +143,9 @@ export function OfficeRoom({
         loopRef.current = null;
       }
       const entities = entitiesRef.current;
-      const usedStations = WORKSTATIONS.slice(0, agentsDef.length);
-      for (let i = 0; i < entities.length; i++) {
-        const agent = entities[i];
-        const ws = usedStations[i];
+      for (const agent of entities) {
+        const ws = WORKSTATIONS.find(w => w.agentId === agent.id);
+        if (!ws) continue;
         agent.x = ws.seatPx.x;
         agent.y = ws.seatPx.y;
         agent.tileCol = ws.seatCol;
@@ -251,9 +249,9 @@ export function OfficeRoom({
             className="or-canvas"
           />
 
-          {agentsDef.map((cfg, i) => {
+          {agentsDef.map((cfg) => {
             const agent = domAgents.find(a => a.id === cfg.id);
-            const ws = WORKSTATIONS[i];
+            const ws = WORKSTATIONS.find(w => w.agentId === cfg.id);
             if (!ws) return null;
             const isAtDesk = agent?.state === 'work' || agent?.state === 'deepfocus';
             const isFocus = agent?.state === 'deepfocus';

@@ -51,7 +51,7 @@ function inferAction(updatedAtMs: number, initOnly?: boolean): string {
 }
 
 export function DemoShell() {
-  const { commands: realCommands, rawStatus, isConnected, isLoading } = useOpenclawStatus();
+  const { commands: realCommands, rawStatus, isConnected, isLoading, lastPolledAt } = useOpenclawStatus();
   const [manualCommands, setManualCommands] = useState<AgentCommand[]>([]);
   const [activeCmd, setActiveCmd] = useState<{ agentId: string; action: string } | null>(null);
   const activeCmdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -185,7 +185,7 @@ export function DemoShell() {
         {[
           { label: '当前活跃', value: isLoading ? '…' : isConnected ? `${activeCount} / ${AGENTS.length}` : '—', sub: '名 Agent 工作中（10 分钟内）' },
           { label: '状态切换', value: String(eventCount), sub: '次状态变化已记录' },
-          { label: '轮询间隔', value: '30s', sub: isLoading ? '连接中...' : isConnected ? 'stage.yldm.tech/status' : '等待连接...' },
+          { label: '上次同步', value: lastPolledAt ? timeAgo(lastPolledAt) : '—', sub: isLoading ? '连接中...' : isConnected ? 'stage.yldm.tech/status · 30s 轮询' : '等待连接...' },
         ].map(stat => (
           <div key={stat.label} style={{
             background: '#0f172a', border: '1px solid #1e293b', borderRadius: 10, padding: '12px 16px',

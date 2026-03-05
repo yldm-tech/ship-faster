@@ -285,7 +285,7 @@ export function tickBehavior(
         agent.emotion = null;
         agent.dwellUntil = Date.now() + 1500;
       } else if (cmd.action === 'idle') {
-        // offline/未启动 agent：回座位静坐，不参与随机行为
+        // idle/待命中 agent：回座位静坐，不参与随机行为
         navigateToSeat(agent, walkable, 'idle');
         agent.message = null;
         agent.talkingTo = null;

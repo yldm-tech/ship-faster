@@ -15,6 +15,7 @@ export interface OpenclawStatusResult {
   rawStatus: RawAgentStatus | null;
   isConnected: boolean;
   isLoading: boolean;
+  lastPolledAt: number | null;
 }
 
 function pick<T>(arr: readonly T[]): T {
@@ -57,6 +58,7 @@ export function useOpenclawStatus(): OpenclawStatusResult {
     rawStatus: null,
     isConnected: false,
     isLoading: true,
+    lastPolledAt: null,
   });
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -65,7 +67,7 @@ export function useOpenclawStatus(): OpenclawStatusResult {
       const status = await fetchStatus();
 
       if (!status) {
-        setResult(prev => ({ ...prev, isConnected: false, rawStatus: null, isLoading: false }));
+        setResult(prev => ({ ...prev, isConnected: false, rawStatus: null, isLoading: false, lastPolledAt: Date.now() }));
         return;
       }
 
@@ -89,7 +91,7 @@ export function useOpenclawStatus(): OpenclawStatusResult {
         cmds.push({ agentId: talker.id, action: 'talk', message: '快速同步', targetAgentId: target.id });
       }
 
-      setResult({ commands: cmds, rawStatus: status, isConnected: true, isLoading: false });
+      setResult({ commands: cmds, rawStatus: status, isConnected: true, isLoading: false, lastPolledAt: Date.now() });
     };
 
     tick();
