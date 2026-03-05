@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
-const STATUS_URL = process.env.OPENCLAW_STATUS_URL ?? 'https://stage.yldm.tech/status';
+// OPENCLAW_STATUS_URL env var may be stale; prefer OPENCLAW_STATUS_URL_V2 or fallback
+const STATUS_URL = process.env.OPENCLAW_STATUS_URL_V2 ?? 'https://stage.yldm.tech/status';
 
 export const revalidate = 30;
 
