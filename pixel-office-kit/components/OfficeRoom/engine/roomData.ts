@@ -45,9 +45,9 @@ export const ROOM_MAP: TileType[][] = [
   [W, WB, WB, WB, W, W, W, W, W, W, W, W, W, W, WN, WN, WN, WN, CK, W, W, W, W, W, W, W, W, W, AF, AF, W, W, W, W, W],
   [W, WB, WB, WB, W, W, W, W, W, W, W, W, W, W, WN, WN, WN, WN, W, W, W, W, W, W, W, W, W, W, AF, AF, W, SO, SO, SO, W],
   [B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, SO, SO, SO, B],
-  [F, F, F, D, D, D, F, D, D, D, F, D, D, D, D, D, D, D, D, D, F, D, D, D, F, L, L, L, L, L, L, SO, SO, SO, L],
-  [F, F, F, D, D, D, F, D, D, D, F, D, D, D, D, D, D, D, D, D, F, D, D, D, F, L, L, L, L, L, L, D, D, D, L],
-  [F, F, F, F, S, F, F, F, S, F, F, F, S, F, F, S, F, F, S, F, F, F, S, F, L, L, L, L, L, L, L, L, S, L, L],
+  [F, F, F, D, D, D, F, D, D, D, F, D, D, D, D, D, D, D, D, D, F, D, D, D, F, D, D, D, L, L, L, SO, SO, SO, L],
+  [F, F, F, D, D, D, F, D, D, D, F, D, D, D, D, D, D, D, D, D, F, D, D, D, F, D, D, D, L, L, L, D, D, D, L],
+  [F, F, F, F, S, F, F, F, S, F, F, F, S, F, F, S, F, F, S, F, F, F, S, F, L, L, S, L, L, L, L, L, S, L, L],
   [F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, L, L, L, CM, L, L, L, L, L, L, L],
   [F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, L, L, L, CM, L, L, L, L, L, L, L],
   [F, F, F, F, F, F, F, F, F, MT, MT, MT, F, F, F, F, F, F, F, F, F, F, F, F, L, L, L, L, L, L, L, FR, FR, L, L],
@@ -68,8 +68,14 @@ export interface Workstation {
   color: string;
 }
 
-// WORKSTATIONS 按 AGENTS 数组顺序排列：aria/neon/rex/lyra/emma/zeph/nova
+// WORKSTATIONS 按 AGENTS 数组顺序排列：main/aria/neon/rex/lyra/emma/zeph/nova
 export const WORKSTATIONS: Workstation[] = [
+  {
+    agentId: 'main', color: '#f8fafc',
+    seatCol: 26, seatRow: 6,
+    seatPx: { x: 26 * TILE_SIZE + TILE_SIZE / 2, y: 6 * TILE_SIZE + TILE_SIZE / 2 },
+    deskCols: [25, 26, 27], deskRows: [4, 5], facingDir: 'up',
+  },
   {
     agentId: 'aria', color: '#a855f7',
     seatCol: 4, seatRow: 6,

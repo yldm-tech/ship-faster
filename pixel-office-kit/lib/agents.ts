@@ -8,6 +8,7 @@ export interface AgentDef {
 }
 
 export const AGENTS: AgentDef[] = [
+  { id: 'main',  name: '智多星', avatar: '/avatars/main.svg',  color: '#f8fafc', workStyle: 'orchestrating', role: '主 Agent'   },
   { id: 'aria',  name: 'Aria',  avatar: '/avatars/aria.svg',  color: '#a855f7', workStyle: 'commanding', role: '产品经理'   },
   { id: 'neon',  name: 'Neon',  avatar: '/avatars/neon.svg',  color: '#06b6d4', workStyle: 'artistic',   role: '前端工程师'  },
   { id: 'rex',   name: 'Rex',   avatar: '/avatars/rex.svg',   color: '#f97316', workStyle: 'impulsive',  role: 'DevOps'    },
@@ -18,6 +19,7 @@ export const AGENTS: AgentDef[] = [
 ];
 
 export const WORK_MSGS: Record<string, string[]> = {
+  main:  ['调度任务中...', '协调各 Agent', '分析用户指令', '整合团队进度'],
   aria:  ['撰写需求文档...', '整理产品 Backlog', '定义验收标准', '审查 PRD 中'],
   neon:  ['搭建 UI 组件...', '调试样式', '组件代码审查', '对接 API 中'],
   rex:   ['部署基础设施...', '检查 k8s 状态', 'CI 流水线运行中', '处理监控告警'],
@@ -28,6 +30,7 @@ export const WORK_MSGS: Record<string, string[]> = {
 };
 
 export const PERSONALITY_BANTER: Record<string, string[]> = {
+  main:  ['任务已分派', '团队进度同步中', '优先级已调整', '汇报给 Evan 中'],
   aria:  ['检测到需求蔓延', '需要补充验收标准', 'Backlog 梳理完毕', '用户故事已就绪'],
   neon:  ['动画好丝滑', 'CSS 是一门艺术', '移动端适配不错', '检查打包体积'],
   rex:   ['基础设施稳定', '今天零故障', '重复操作已自动化', 'GitOps 一把梭'],
@@ -40,6 +43,7 @@ export const PERSONALITY_BANTER: Record<string, string[]> = {
 export const COFFEE_MSGS: string[] = ['☕ 啊...', '喝杯咖啡！', '需要补充咖啡因', '续命中...'];
 
 export const CELEBRATE_MSGS: Record<string, string[]> = {
+  main:  ['任务全部完成！', '团队配合完美！', '用户满意！'],
   aria:  ['按时交付！', 'Sprint 完成！', '目标达成！'],
   neon:  ['效果完美！', 'UI 审查通过！', '组件真香！'],
   rex:   ['零停机！', '基础设施稳！', '部署成功！'],
@@ -50,6 +54,7 @@ export const CELEBRATE_MSGS: Record<string, string[]> = {
 };
 
 export const LOUNGE_MSGS: Record<string, string[]> = {
+  main:  ['等待新任务...', '监听各频道中', '准备下一轮调度'],
   aria:  ['回顾产品路线图...', '思考战略方向', '静静规划中...'],
   neon:  ['刷 Dribbble 找灵感', '沉浸在设计美学里', '探索新的设计风格'],
   rex:   ['盯着监控面板', '被动观察中', '看指标发呆'],

@@ -42,7 +42,7 @@ function actionColor(action: string): string {
 
 /** 根据 updatedAtMs 和 initOnly 推断当前状态 */
 function inferAction(updatedAtMs: number, initOnly?: boolean): string {
-  if (initOnly) return 'offline';                   // 工作区只有初始化文件 → 进程未启动
+  if (initOnly) return 'idle';                      // 工作区只有初始化文件 → 待命中，尚无任务
   const age = Date.now() - updatedAtMs;
   if (age < 2 * 60 * 1000) return 'deepfocus';   // 2 分钟内：深度专注
   if (age < 10 * 60 * 1000) return 'work';        // 10 分钟内：工作中
@@ -237,7 +237,7 @@ export function DemoShell() {
                   padding: '11px 13px',
                   position: 'relative',
                   overflow: 'hidden',
-                  opacity: action === 'offline' ? 0.45 : 1,
+                  opacity: !s ? 0.45 : 1,
                 }}>
                   {isActive && (
                     <div style={{
@@ -272,7 +272,7 @@ export function DemoShell() {
                   </div>
 
                   <div style={{ color: '#334155', fontSize: 10, minHeight: 14 }}>
-                    {s?.initOnly ? '未启动' : s ? timeAgo(s.updatedAtMs) : (isLoading ? '...' : isConnected ? '暂无数据' : '未连接')}
+                    {s?.initOnly ? '待命中' : s ? timeAgo(s.updatedAtMs) : (isLoading ? '...' : isConnected ? '暂无数据' : '未连接')}
                   </div>
                   {s?.file && !s.initOnly && (
                     <div style={{
