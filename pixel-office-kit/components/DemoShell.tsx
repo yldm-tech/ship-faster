@@ -222,7 +222,7 @@ export function DemoShell() {
           <div style={{ color: '#475569', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
             Agent 状态
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
             {AGENTS.map(agent => {
               const s = rawStatus?.[agent.id];
               const action = s ? inferAction(s.updatedAtMs, s.initOnly) : 'offline';

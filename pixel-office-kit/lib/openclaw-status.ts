@@ -73,9 +73,9 @@ export function useOpenclawStatus(): OpenclawStatusResult {
         .filter(a => status[a.id]?.updatedAtMs && !status[a.id].initOnly)
         .map(a => statusToCommand(a.id, status[a.id].updatedAtMs));
 
-      // initOnly agent → 发送 offline 命令让他们坐在位置上不动
+      // initOnly agent → 发送 idle 命令让他们坐在位置上待命
       AGENTS.filter(a => status[a.id]?.initOnly).forEach(a => {
-        cmds.push({ agentId: a.id, action: 'idle', message: '未启动' });
+        cmds.push({ agentId: a.id, action: 'idle', message: '待命中' });
       });
 
       // 让活跃的 Agent 之间产生一次沟通动画
