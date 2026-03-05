@@ -8,7 +8,7 @@ const TYPE_FRAME_MS = 300;
 const WALK_FRAME_SEQ = [0, 1, 2, 1];
 const SIT_OFFSET_Y = 6;
 
-type IdleAction = 'work' | 'coffee' | 'lounge' | 'talk' | 'wander' | 'celebrate';
+type IdleAction = 'work' | 'coffee' | 'lounge' | 'talk' | 'wander' | 'celebrate' | 'think';
 
 const WANDER_PROFILE = {
   movesMin: 3, movesMax: 6,
@@ -32,6 +32,7 @@ function pickIdleAction(): IdleAction {
     ['talk', 1.5],
     ['wander', 2.5],
     ['celebrate', 0.5],
+    ['think', 0.7],
   ];
   const total = weights.reduce((s, [, w]) => s + w, 0);
   const roll = Math.random() * total;
@@ -191,6 +192,7 @@ export function tickBehavior(
   coffeeMsgs: string[],
   celebrateMsgs: Record<string, string[]>,
   loungeMsgs: Record<string, string[]>,
+  thinkMsgs: Record<string, string[]>,
 ): void {
   agent.stateAge += dtMs;
 
@@ -410,6 +412,13 @@ export function tickBehavior(
       agent.talkingTo = null;
       agent.sentiment = null;
       agent.dwellUntil = Date.now() + 900;
+    } else if (idle === 'think') {
+      navigateToSeat(agent, walkable, 'think');
+      agent.message = pick(thinkMsgs[agent.id] ?? ['...']);
+      agent.talkingTo = null;
+      agent.emotion = 'thinking';
+      agent.sentiment = null;
+      agent.dwellUntil = Date.now() + 2500;
     } else {
       startWanderCycle(agent);
     }

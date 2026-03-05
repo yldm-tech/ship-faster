@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { OfficeRoom } from './OfficeRoom/OfficeRoom';
 import { ControlPanel } from './ControlPanel';
-import { AGENTS, WORK_MSGS, PERSONALITY_BANTER, COFFEE_MSGS, CELEBRATE_MSGS, LOUNGE_MSGS } from '@/lib/agents';
+import { AGENTS, WORK_MSGS, PERSONALITY_BANTER, COFFEE_MSGS, CELEBRATE_MSGS, LOUNGE_MSGS, THINK_MSGS } from '@/lib/agents';
 import { useOpenclawStatus, inferFromFile, ACTIVE_THRESHOLD_MS } from '@/lib/openclaw-status';
 import type { AgentCommand } from './OfficeRoom/OfficeRoom';
 
@@ -226,6 +226,7 @@ export function DemoShell() {
           coffeeMsgs={COFFEE_MSGS}
           celebrateMsgs={CELEBRATE_MSGS}
           loungeMsgs={LOUNGE_MSGS}
+          thinkMsgs={THINK_MSGS}
         />
       </div>
 

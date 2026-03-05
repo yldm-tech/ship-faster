@@ -59,6 +59,20 @@
   animation: or-dash-flow 0.8s linear infinite;
 }
 
+.or-talk-line-argue {
+  stroke: #ef4444;
+  opacity: 0.85;
+  stroke-dasharray: 3 3;
+  animation: or-dash-flow 0.4s linear infinite;
+}
+
+.or-talk-line-gossip {
+  stroke: #fbbf24;
+  opacity: 0.75;
+  stroke-dasharray: 2 6;
+  animation: or-dash-flow 1.2s linear infinite;
+}
+
 @keyframes or-dash-flow {
   from { stroke-dashoffset: 0; }
   to   { stroke-dashoffset: -16; }

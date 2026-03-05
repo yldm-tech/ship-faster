@@ -42,6 +42,7 @@ export interface OfficeRoomProps {
   coffeeMsgs?: string[];
   celebrateMsgs?: Record<string, string[]>;
   loungeMsgs?: Record<string, string[]>;
+  thinkMsgs?: Record<string, string[]>;
 }
 
 const DEFAULT_WORK_MSGS: Record<string, string[]> = { _default: ['Working...'] };
@@ -49,6 +50,7 @@ const DEFAULT_BANTER: Record<string, string[]> = { _default: ['Hey there!'] };
 const DEFAULT_COFFEE = ['Coffee time!', 'Refueling...'];
 const DEFAULT_CELEBRATE: Record<string, string[]> = { _default: ['Woohoo!'] };
 const DEFAULT_LOUNGE: Record<string, string[]> = { _default: ['Relaxing...'] };
+const DEFAULT_THINK: Record<string, string[]> = { _default: ['...'] };
 
 const WALK_FRAME_SEQ = [0, 1, 2, 1];
 
@@ -71,6 +73,7 @@ export function OfficeRoom({
   coffeeMsgs = DEFAULT_COFFEE,
   celebrateMsgs = DEFAULT_CELEBRATE,
   loungeMsgs = DEFAULT_LOUNGE,
+  thinkMsgs = DEFAULT_THINK,
 }: OfficeRoomProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -186,7 +189,7 @@ export function OfficeRoom({
           entities, conversationRef.current,
           commandsRef.current,
           workMsgs, personalityBanter, coffeeMsgs,
-          celebrateMsgs, loungeMsgs,
+          celebrateMsgs, loungeMsgs, thinkMsgs,
         );
       }
 
@@ -216,7 +219,7 @@ export function OfficeRoom({
       loopRef.current = null;
       document.removeEventListener('visibilitychange', onVisibilityChange);
     };
-  }, [isActive, activityLevel, agentsDef, workMsgs, personalityBanter, coffeeMsgs, celebrateMsgs, loungeMsgs]);
+  }, [isActive, activityLevel, agentsDef, workMsgs, personalityBanter, coffeeMsgs, celebrateMsgs, loungeMsgs, thinkMsgs]);
 
   const frameW = DISPLAY_W * scale;
   const frameH = DISPLAY_H * scale;
@@ -304,9 +307,14 @@ export function OfficeRoom({
               const y1 = ((a.y + a.sitOffsetY) * SCALE / DISPLAY_H) * 100;
               const x2 = (t.x * SCALE / DISPLAY_W) * 100;
               const y2 = ((t.y + t.sitOffsetY) * SCALE / DISPLAY_H) * 100;
+              const lineClass = a.state === 'argue'
+                ? 'or-talk-line or-talk-line-argue'
+                : a.state === 'gossip'
+                  ? 'or-talk-line or-talk-line-gossip'
+                  : 'or-talk-line';
               return (
                 <line key={a.id}
-                  className="or-talk-line"
+                  className={lineClass}
                   x1={`${x1}%`} y1={`${y1}%`}
                   x2={`${x2}%`} y2={`${y2}%`}
                 />
