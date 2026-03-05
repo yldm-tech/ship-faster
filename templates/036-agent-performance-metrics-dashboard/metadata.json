@@ -1,0 +1,5 @@
+{
+  "name": "Agent Performance Metrics Dashboard",
+  "description": "Metrics dashboard tracking agent-specific KPIs like token efficiency, task completion rates, and cost per successful run.",
+  "requestFramePermissions": []
+}

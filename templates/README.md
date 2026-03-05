@@ -70,6 +70,8 @@ Templates are runnable, full projects you can start from. Each template is self-
 
 | `035-system-prompt-audit-service` | System Prompt Audit Service | [`035-system-prompt-audit-service/`](035-system-prompt-audit-service/) |
 
+| `036-agent-performance-metrics-dashboard` | Agent Performance Metrics Dashboard | [`036-agent-performance-metrics-dashboard/`](036-agent-performance-metrics-dashboard/) |
+
 ## Usage
 
 1. Enter a template directory (example: `templates/001-copyback-studio`).
