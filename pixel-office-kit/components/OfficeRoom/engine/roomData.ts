@@ -68,45 +68,46 @@ export interface Workstation {
   color: string;
 }
 
+// WORKSTATIONS 按 AGENTS 数组顺序排列：aria/neon/rex/lyra/emma/zeph/nova
 export const WORKSTATIONS: Workstation[] = [
   {
-    agentId: 'minion', color: '#f59e0b',
+    agentId: 'aria', color: '#a855f7',
     seatCol: 4, seatRow: 6,
     seatPx: { x: 4 * TILE_SIZE + TILE_SIZE / 2, y: 6 * TILE_SIZE + TILE_SIZE / 2 },
     deskCols: [3, 4, 5], deskRows: [4, 5], facingDir: 'up',
   },
   {
-    agentId: 'sage', color: '#8b5cf6',
+    agentId: 'neon', color: '#06b6d4',
     seatCol: 8, seatRow: 6,
     seatPx: { x: 8 * TILE_SIZE + TILE_SIZE / 2, y: 6 * TILE_SIZE + TILE_SIZE / 2 },
     deskCols: [7, 8, 9], deskRows: [4, 5], facingDir: 'up',
   },
   {
-    agentId: 'scout', color: '#10b981',
+    agentId: 'rex', color: '#f97316',
     seatCol: 12, seatRow: 6,
     seatPx: { x: 12 * TILE_SIZE + TILE_SIZE / 2, y: 6 * TILE_SIZE + TILE_SIZE / 2 },
     deskCols: [11, 12, 13], deskRows: [4, 5], facingDir: 'up',
   },
   {
-    agentId: 'quill', color: '#0ea5e9',
+    agentId: 'lyra', color: '#22c55e',
     seatCol: 18, seatRow: 6,
     seatPx: { x: 18 * TILE_SIZE + TILE_SIZE / 2, y: 6 * TILE_SIZE + TILE_SIZE / 2 },
     deskCols: [17, 18, 19], deskRows: [4, 5], facingDir: 'up',
   },
   {
-    agentId: 'xalt', color: '#f43f5e',
+    agentId: 'emma', color: '#3b82f6',
     seatCol: 22, seatRow: 6,
     seatPx: { x: 22 * TILE_SIZE + TILE_SIZE / 2, y: 6 * TILE_SIZE + TILE_SIZE / 2 },
     deskCols: [21, 22, 23], deskRows: [4, 5], facingDir: 'up',
   },
   {
-    agentId: 'observer', color: '#14b8a6',
+    agentId: 'zeph', color: '#eab308',
     seatCol: 32, seatRow: 6,
     seatPx: { x: 32 * TILE_SIZE + TILE_SIZE / 2, y: 6 * TILE_SIZE + TILE_SIZE / 2 },
     deskCols: [31, 32, 33], deskRows: [4, 5], facingDir: 'up',
   },
   {
-    agentId: 'nova7', color: '#f43f5e',
+    agentId: 'nova', color: '#f43f5e',
     seatCol: 15, seatRow: 6,
     seatPx: { x: 15 * TILE_SIZE + TILE_SIZE / 2, y: 6 * TILE_SIZE + TILE_SIZE / 2 },
     deskCols: [14, 15, 16], deskRows: [4, 5], facingDir: 'up',

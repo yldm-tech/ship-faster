@@ -33,9 +33,9 @@ function actionLabel(action: string): string {
 
 function actionColor(action: string): string {
   const map: Record<string, string> = {
-    work: '#22c55e', deepfocus: '#10b981', coffee: '#f59e0b',
+    work: '#22c55e', deepfocus: '#34d399', coffee: '#f59e0b',
     lounge: '#6b7280', celebrate: '#ec4899', talk: '#06b6d4',
-    wave: '#8b5cf6', idle: '#374151', offline: '#1e293b',
+    wave: '#8b5cf6', idle: '#374151', offline: '#475569',
   };
   return map[action] ?? '#4b5563';
 }
@@ -127,7 +127,7 @@ export function DemoShell() {
   const activeCount = rawStatus
     ? AGENTS.filter(a => {
         const s = rawStatus[a.id];
-        return s && Date.now() - s.updatedAtMs < 10 * 60 * 1000;
+        return s && !s.initOnly && Date.now() - s.updatedAtMs < 10 * 60 * 1000;
       }).length
     : 0;
 
@@ -231,6 +231,7 @@ export function DemoShell() {
                   padding: '11px 13px',
                   position: 'relative',
                   overflow: 'hidden',
+                  opacity: action === 'offline' ? 0.45 : 1,
                 }}>
                   {isActive && (
                     <div style={{
@@ -265,11 +266,11 @@ export function DemoShell() {
                   </div>
 
                   <div style={{ color: '#334155', fontSize: 10, minHeight: 14 }}>
-                    {s ? timeAgo(s.updatedAtMs) : (isConnected ? '暂无数据' : '未连接')}
+                    {s?.initOnly ? '未启动' : s ? timeAgo(s.updatedAtMs) : (isConnected ? '暂无数据' : '未连接')}
                   </div>
-                  {s?.file && isActive && (
+                  {s?.file && !s.initOnly && (
                     <div style={{
-                      color: '#1e3a2e', fontSize: 9, marginTop: 3,
+                      color: isActive ? '#1e4a3a' : '#1e293b', fontSize: 9, marginTop: 3,
                       overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                     }} title={s.file}>
                       📄 {s.file.split('/').pop()}
