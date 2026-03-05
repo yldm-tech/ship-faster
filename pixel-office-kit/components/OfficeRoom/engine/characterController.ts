@@ -269,14 +269,18 @@ export function tickBehavior(
 
       const targetAgent = cmd.targetAgentId ? allAgents.find(a => a.id === cmd.targetAgentId) : undefined;
       if (cmd.action === 'work') {
-        navigateToSeat(agent, walkable, 'work');
-        agent.message = cmd.message?.slice(0, 30) ?? pick(workMsgs[agent.id] ?? ['Working...']);
+        const moved = navigateToSeat(agent, walkable, 'work');
+        if (moved || !agent.message) {
+          agent.message = cmd.message?.slice(0, 30) ?? pick(workMsgs[agent.id] ?? ['Working...']);
+        }
         agent.talkingTo = null;
         agent.emotion = null;
         agent.dwellUntil = Date.now() + 1500;
       } else if (cmd.action === 'deepfocus') {
-        navigateToSeat(agent, walkable, 'deepfocus');
-        agent.message = cmd.message?.slice(0, 30) ?? pick(workMsgs[agent.id] ?? ['深度专注中...']);
+        const moved = navigateToSeat(agent, walkable, 'deepfocus');
+        if (moved || !agent.message) {
+          agent.message = cmd.message?.slice(0, 30) ?? pick(workMsgs[agent.id] ?? ['深度专注中...']);
+        }
         agent.talkingTo = null;
         agent.emotion = null;
         agent.dwellUntil = Date.now() + 1500;
@@ -332,10 +336,10 @@ export function tickBehavior(
     }
   }
 
-  // 有真实工作状态命令的 agent，大幅降低随机行为触发频率
+  // 有真实工作状态命令的 agent，极大降低随机行为触发频率（主要待在工作台）
   const hasWorkCmd = cmd && (cmd.action === 'work' || cmd.action === 'deepfocus');
   const tempo = hasWorkCmd
-    ? (activityLevel > 20 ? 0.0004 : 0.0002)
+    ? 0.00008  // ~0.13%/sec at 60fps，约每 12 秒一次随机行为
     : (activityLevel > 20 ? 0.0020 : activityLevel > 5 ? 0.0010 : 0.0005);
   if (Math.random() < tempo * dtMs) {
     const idle = pickIdleAction();

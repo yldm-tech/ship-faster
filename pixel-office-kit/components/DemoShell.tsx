@@ -121,8 +121,14 @@ export function DemoShell() {
     return () => { if (activeCmdTimerRef.current) clearTimeout(activeCmdTimerRef.current); };
   }, []);
 
+  // isLoading 期间让所有 agent 坐着等待，避免首次 poll 前随机乱跑
+  const loadingIdleCmds = isLoading
+    ? AGENTS.map(a => ({ agentId: a.id, action: 'idle' as const, message: '' }))
+    : [];
   // OfficeRoom 同时接收真实命令 + 最近手动命令
-  const officeCommands = [...realCommands, ...manualCommands.slice(-3)];
+  const officeCommands = isLoading
+    ? loadingIdleCmds
+    : [...realCommands, ...manualCommands.slice(-3)];
 
   const activeCount = rawStatus
     ? AGENTS.filter(a => {
