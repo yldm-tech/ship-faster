@@ -43,9 +43,10 @@ function actionColor(action: string): string {
 /** 根据 updatedAtMs 推断当前状态 */
 function inferAction(updatedAtMs: number): string {
   const age = Date.now() - updatedAtMs;
-  if (age < 10 * 60 * 1000) return 'work';
-  if (age < 60 * 60 * 1000) return 'lounge';
-  return 'coffee';
+  if (age < 2 * 60 * 1000) return 'deepfocus';   // 2 分钟内：深度专注
+  if (age < 10 * 60 * 1000) return 'work';        // 10 分钟内：工作中
+  if (age < 60 * 60 * 1000) return 'lounge';      // 60 分钟内：摸鱼中
+  return 'coffee';                                  // 超过 1 小时：喝咖啡
 }
 
 export function DemoShell() {
@@ -74,6 +75,7 @@ export function DemoShell() {
       prevActionRef.current[agent.id] = action;
 
       const msgMap: Record<string, string> = {
+        deepfocus: '深度专注中',
         work: '开始工作',
         lounge: '进入摸鱼模式',
         coffee: '去喝咖啡了',
@@ -138,7 +140,7 @@ export function DemoShell() {
             OpenClaw 团队工作台
           </h1>
           <p style={{ color: '#64748b', fontSize: 12, marginTop: 5, marginBottom: 0, lineHeight: 1.6 }}>
-            6 个 AI Agent 实时协同工作 · 基于文件系统活跃度追踪 · 每 30 秒更新
+            {AGENTS.length} 个 AI Agent 实时协同工作 · 基于文件系统活跃度追踪 · 每 30 秒更新
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
@@ -167,16 +169,16 @@ export function DemoShell() {
           marginBottom: 16, padding: '12px 16px', borderRadius: 10,
           background: '#1c0a00', border: '1px solid #7c2d12', color: '#fb923c', fontSize: 12,
         }}>
-          ⚠️ 无法连接到 openclaw stage server（stage.yldm.ai/status）。请按照 <code>scripts/SETUP.md</code> 完成 macmini 配置。
+          ⚠️ 无法连接到 openclaw stage server（stage.yldm.tech/status）。请按照 <code>scripts/SETUP.md</code> 完成 macmini 配置。
         </div>
       )}
 
       {/* ── Stats bar ── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 16 }}>
         {[
-          { label: '当前活跃', value: isConnected ? `${activeCount} / 6` : '—', sub: '名 Agent 工作中（10 分钟内）' },
+          { label: '当前活跃', value: isConnected ? `${activeCount} / ${AGENTS.length}` : '—', sub: '名 Agent 工作中（10 分钟内）' },
           { label: '状态切换', value: String(eventCount), sub: '次状态变化已记录' },
-          { label: '轮询间隔', value: '30s', sub: isConnected ? 'stage.yldm.ai/status' : '等待连接...' },
+          { label: '轮询间隔', value: '30s', sub: isConnected ? 'stage.yldm.tech/status' : '等待连接...' },
         ].map(stat => (
           <div key={stat.label} style={{
             background: '#0f172a', border: '1px solid #1e293b', borderRadius: 10, padding: '12px 16px',
@@ -264,6 +266,14 @@ export function DemoShell() {
                   <div style={{ color: '#334155', fontSize: 10, minHeight: 14 }}>
                     {s ? timeAgo(s.updatedAtMs) : (isConnected ? '暂无数据' : '未连接')}
                   </div>
+                  {s?.file && isActive && (
+                    <div style={{
+                      color: '#1e3a2e', fontSize: 9, marginTop: 3,
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    }} title={s.file}>
+                      📄 {s.file.split('/').pop()}
+                    </div>
+                  )}
                 </div>
               );
             })}

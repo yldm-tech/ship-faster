@@ -8,7 +8,7 @@ const ACTIVE_THRESHOLD_MS = 10 * 60 * 1000;   // 10 分钟内 → 工作中
 const IDLE_THRESHOLD_MS   = 60 * 60 * 1000;   // 60 分钟内 → 摸鱼中
 const POLL_INTERVAL_MS    = 30 * 1000;         // 每 30 秒轮询
 
-export type RawAgentStatus = Record<string, { updatedAtMs: number }>;
+export type RawAgentStatus = Record<string, { updatedAtMs: number; file?: string }>;
 
 export interface OpenclawStatusResult {
   commands: AgentCommand[];
@@ -20,9 +20,14 @@ function pick<T>(arr: readonly T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+const DEEPFOCUS_THRESHOLD_MS = 2 * 60 * 1000;   // 2 分钟内 → 深度专注
+
 function statusToCommand(agentId: string, updatedAtMs: number): AgentCommand {
   const age = Date.now() - updatedAtMs;
 
+  if (age < DEEPFOCUS_THRESHOLD_MS) {
+    return { agentId, action: 'deepfocus', message: pick(WORK_MSGS[agentId] ?? ['深度专注中...']) };
+  }
   if (age < ACTIVE_THRESHOLD_MS) {
     return { agentId, action: 'work', message: pick(WORK_MSGS[agentId] ?? ['工作中...']) };
   }
