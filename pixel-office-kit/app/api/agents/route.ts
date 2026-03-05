@@ -15,7 +15,8 @@ export async function GET(_req: NextRequest) {
     return NextResponse.json(data, {
       headers: { 'Cache-Control': 's-maxage=30, stale-while-revalidate=60' },
     });
-  } catch {
-    return NextResponse.json({ error: 'unavailable' }, { status: 503 });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return NextResponse.json({ error: 'unavailable', detail: msg, url: STATUS_URL }, { status: 503 });
   }
 }
