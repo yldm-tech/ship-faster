@@ -24,19 +24,68 @@ function pick<T>(arr: readonly T[]): T {
 
 const DEEPFOCUS_THRESHOLD_MS = 2 * 60 * 1000;   // 2 分钟内 → 深度专注
 
-function statusToCommand(agentId: string, updatedAtMs: number): AgentCommand {
+/**
+ * 根据文件路径推断 bot 正在做什么，返回 { action, msg } 或 null（回退时间推断）。
+ *
+ * Bot 行为穷举（按文件路径）：
+ *   memory/           → think  "整理记忆中"
+ *   CLAUDE.md         → think  "读任务简报"
+ *   decisions/ 等     → think  "架构决策中"
+ *   *.test.ts / tests/→ deepfocus/work  "跑测试中"
+ *   *.ts/tsx/py/go…   → deepfocus/work  "写代码中"
+ *   *.sh              → deepfocus/work  "跑脚本中"
+ *   *.md              → work   "写文档中"
+ *   *.json/yaml/toml… → deepfocus/work  "调配置中"
+ *   其他              → null（按时间推断：deepfocus/work/lounge/coffee）
+ */
+export function inferFromFile(file: string | undefined, ageMs: number): { action: string; msg: string } | null {
+  if (!file) return null;
+  const lower = file.toLowerCase().replace(/\\/g, '/');
+  const base = lower.split('/').pop() ?? '';
+
+  if (lower.includes('/memory/'))
+    return { action: 'think', msg: '整理记忆中...' };
+  if (base === 'claude.md')
+    return { action: 'think', msg: '读任务简报...' };
+  if (lower.includes('/decisions/') || base === 'decisions.md' || base === 'architecture.md')
+    return { action: 'think', msg: '架构决策中...' };
+  if (base.includes('.test.') || base.includes('.spec.') || lower.includes('/tests/') || lower.includes('/__tests__/'))
+    return { action: ageMs < DEEPFOCUS_THRESHOLD_MS ? 'deepfocus' : 'work', msg: '跑测试中...' };
+  if (/\.(ts|tsx|js|jsx|py|go|rs|java|cpp|c)$/.test(base))
+    return { action: ageMs < DEEPFOCUS_THRESHOLD_MS ? 'deepfocus' : 'work', msg: '写代码中...' };
+  if (/\.(sh|bash|zsh)$/.test(base))
+    return { action: ageMs < DEEPFOCUS_THRESHOLD_MS ? 'deepfocus' : 'work', msg: '跑脚本中...' };
+  if (/\.(md|mdx)$/.test(base))
+    return { action: 'work', msg: '写文档中...' };
+  if (/\.(json|yaml|yml|toml|env|cfg|conf)$/.test(base))
+    return { action: ageMs < DEEPFOCUS_THRESHOLD_MS ? 'deepfocus' : 'work', msg: '调配置中...' };
+
+  return null;
+}
+
+function statusToCommand(agentId: string, updatedAtMs: number, file?: string): AgentCommand {
   const age = Date.now() - updatedAtMs;
 
+  // 超过 1 小时 → 喝咖啡，无论文件类型
+  if (age >= IDLE_THRESHOLD_MS) return { agentId, action: 'coffee', message: '喝杯咖啡' };
+
+  const fromFile = inferFromFile(file, age);
+  if (fromFile) {
+    // 文件有活动但超过 10 分钟 → 摸鱼中
+    if (age >= ACTIVE_THRESHOLD_MS) {
+      return { agentId, action: 'lounge', message: pick(LOUNGE_MSGS[agentId] ?? ['休息中...']) };
+    }
+    return { agentId, action: fromFile.action as AgentCommand['action'], message: fromFile.msg };
+  }
+
+  // 纯时间推断（文件无法识别）
   if (age < DEEPFOCUS_THRESHOLD_MS) {
     return { agentId, action: 'deepfocus', message: pick(WORK_MSGS[agentId] ?? ['深度专注中...']) };
   }
   if (age < ACTIVE_THRESHOLD_MS) {
     return { agentId, action: 'work', message: pick(WORK_MSGS[agentId] ?? ['工作中...']) };
   }
-  if (age < IDLE_THRESHOLD_MS) {
-    return { agentId, action: 'lounge', message: pick(LOUNGE_MSGS[agentId] ?? ['休息中...']) };
-  }
-  return { agentId, action: 'coffee', message: '☕ 喝杯咖啡' };
+  return { agentId, action: 'lounge', message: pick(LOUNGE_MSGS[agentId] ?? ['休息中...']) };
 }
 
 async function fetchStatus(): Promise<RawAgentStatus | null> {
@@ -73,7 +122,7 @@ export function useOpenclawStatus(): OpenclawStatusResult {
 
       const cmds: AgentCommand[] = AGENTS
         .filter(a => status[a.id]?.updatedAtMs && !status[a.id].initOnly)
-        .map(a => statusToCommand(a.id, status[a.id].updatedAtMs));
+        .map(a => statusToCommand(a.id, status[a.id].updatedAtMs, status[a.id].file));
 
       // initOnly agent → 发送 idle 命令让他们坐在位置上待命
       AGENTS.filter(a => status[a.id]?.initOnly).forEach(a => {

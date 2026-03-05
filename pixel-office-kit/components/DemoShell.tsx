@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { OfficeRoom } from './OfficeRoom/OfficeRoom';
 import { ControlPanel } from './ControlPanel';
 import { AGENTS, WORK_MSGS, PERSONALITY_BANTER, COFFEE_MSGS, CELEBRATE_MSGS, LOUNGE_MSGS } from '@/lib/agents';
-import { useOpenclawStatus } from '@/lib/openclaw-status';
+import { useOpenclawStatus, inferFromFile } from '@/lib/openclaw-status';
 import type { AgentCommand } from './OfficeRoom/OfficeRoom';
 
 interface LogEntry {
@@ -26,7 +26,7 @@ function actionLabel(action: string): string {
   const map: Record<string, string> = {
     work: '工作中', deepfocus: '专注中', coffee: '休息中',
     lounge: '摸鱼中', celebrate: '庆祝！', talk: '沟通中',
-    wave: '打招呼', idle: '待机', offline: '离线',
+    wave: '打招呼', idle: '待机', offline: '离线', think: '思考中',
   };
   return map[action] ?? action;
 }
@@ -35,19 +35,21 @@ function actionColor(action: string): string {
   const map: Record<string, string> = {
     work: '#22c55e', deepfocus: '#34d399', coffee: '#f59e0b',
     lounge: '#6b7280', celebrate: '#ec4899', talk: '#06b6d4',
-    wave: '#8b5cf6', idle: '#374151', offline: '#475569',
+    wave: '#8b5cf6', idle: '#374151', offline: '#475569', think: '#a78bfa',
   };
   return map[action] ?? '#4b5563';
 }
 
-/** 根据 updatedAtMs 和 initOnly 推断当前状态 */
-function inferAction(updatedAtMs: number, initOnly?: boolean): string {
-  if (initOnly) return 'idle';                      // 工作区只有初始化文件 → 待命中，尚无任务
+/** 根据文件路径 + 时间推断当前状态（显示层） */
+function inferAction(updatedAtMs: number, file?: string, initOnly?: boolean): string {
+  if (initOnly) return 'idle';
   const age = Date.now() - updatedAtMs;
-  if (age < 2 * 60 * 1000) return 'deepfocus';   // 2 分钟内：深度专注
-  if (age < 10 * 60 * 1000) return 'work';        // 10 分钟内：工作中
-  if (age < 60 * 60 * 1000) return 'lounge';      // 60 分钟内：摸鱼中
-  return 'coffee';                                  // 超过 1 小时：喝咖啡
+  const fromFile = inferFromFile(file, age);
+  if (fromFile && age < 10 * 60 * 1000) return fromFile.action;
+  if (age < 2 * 60 * 1000) return 'deepfocus';
+  if (age < 10 * 60 * 1000) return 'work';
+  if (age < 60 * 60 * 1000) return 'lounge';
+  return 'coffee';
 }
 
 export function DemoShell() {
@@ -71,13 +73,14 @@ export function DemoShell() {
     AGENTS.forEach(agent => {
       const s = rawStatus[agent.id];
       if (!s) return;
-      const action = inferAction(s.updatedAtMs, s.initOnly);
+      const action = inferAction(s.updatedAtMs, s.file, s.initOnly);
       if (prevActionRef.current[agent.id] === action) return;
       prevActionRef.current[agent.id] = action;
 
       const msgMap: Record<string, string> = {
         deepfocus: '深度专注中',
         work: '开始工作',
+        think: '深度思考中',
         lounge: '进入摸鱼模式',
         coffee: '去喝咖啡了',
       };
@@ -225,8 +228,8 @@ export function DemoShell() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
             {AGENTS.map(agent => {
               const s = rawStatus?.[agent.id];
-              const action = s ? inferAction(s.updatedAtMs, s.initOnly) : 'offline';
-              const isActive = action === 'work' || action === 'deepfocus';
+              const action = s ? inferAction(s.updatedAtMs, s.file, s.initOnly) : 'offline';
+              const isActive = action === 'work' || action === 'deepfocus' || action === 'think';
               const dotColor = actionColor(action);
 
               return (
