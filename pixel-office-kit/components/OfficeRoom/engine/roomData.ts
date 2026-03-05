@@ -45,9 +45,9 @@ export const ROOM_MAP: TileType[][] = [
   [W, WB, WB, WB, W, W, W, W, W, W, W, W, W, W, WN, WN, WN, WN, CK, W, W, W, W, W, W, W, W, W, AF, AF, W, W, W, W, W],
   [W, WB, WB, WB, W, W, W, W, W, W, W, W, W, W, WN, WN, WN, WN, W, W, W, W, W, W, W, W, W, W, AF, AF, W, SO, SO, SO, W],
   [B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, B, SO, SO, SO, B],
-  [F, F, F, D, D, D, F, D, D, D, F, D, D, D, F, F, F, D, D, D, F, D, D, D, F, L, L, L, L, L, L, SO, SO, SO, L],
-  [F, F, F, D, D, D, F, D, D, D, F, D, D, D, F, F, F, D, D, D, F, D, D, D, F, L, L, L, L, L, L, D, D, D, L],
-  [F, F, F, F, S, F, F, F, S, F, F, F, S, F, F, F, F, F, S, F, F, F, S, F, L, L, L, L, L, L, L, L, S, L, L],
+  [F, F, F, D, D, D, F, D, D, D, F, D, D, D, D, D, D, D, D, D, F, D, D, D, F, L, L, L, L, L, L, SO, SO, SO, L],
+  [F, F, F, D, D, D, F, D, D, D, F, D, D, D, D, D, D, D, D, D, F, D, D, D, F, L, L, L, L, L, L, D, D, D, L],
+  [F, F, F, F, S, F, F, F, S, F, F, F, S, F, F, S, F, F, S, F, F, F, S, F, L, L, L, L, L, L, L, L, S, L, L],
   [F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, L, L, L, CM, L, L, L, L, L, L, L],
   [F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, L, L, L, CM, L, L, L, L, L, L, L],
   [F, F, F, F, F, F, F, F, F, MT, MT, MT, F, F, F, F, F, F, F, F, F, F, F, F, L, L, L, L, L, L, L, FR, FR, L, L],
@@ -104,6 +104,12 @@ export const WORKSTATIONS: Workstation[] = [
     seatCol: 32, seatRow: 6,
     seatPx: { x: 32 * TILE_SIZE + TILE_SIZE / 2, y: 6 * TILE_SIZE + TILE_SIZE / 2 },
     deskCols: [31, 32, 33], deskRows: [4, 5], facingDir: 'up',
+  },
+  {
+    agentId: 'nova7', color: '#f43f5e',
+    seatCol: 15, seatRow: 6,
+    seatPx: { x: 15 * TILE_SIZE + TILE_SIZE / 2, y: 6 * TILE_SIZE + TILE_SIZE / 2 },
+    deskCols: [14, 15, 16], deskRows: [4, 5], facingDir: 'up',
   },
 ];
 
