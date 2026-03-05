@@ -5,11 +5,15 @@ import { OfficeRoom } from './OfficeRoom/OfficeRoom';
 import { ControlPanel } from './ControlPanel';
 import { AGENTS, WORK_MSGS, PERSONALITY_BANTER, COFFEE_MSGS, CELEBRATE_MSGS, LOUNGE_MSGS } from '@/lib/agents';
 import { useDemoSimulation } from '@/lib/mock-simulation';
+import { useOpenclawStatus } from '@/lib/openclaw-status';
 import type { AgentCommand } from './OfficeRoom/OfficeRoom';
 
 export function DemoShell() {
   const [autoMode, setAutoMode] = useState(true);
-  const autoCommands = useDemoSimulation(autoMode);
+  const mockCommands = useDemoSimulation(autoMode);
+  const realCommands = useOpenclawStatus(autoMode);
+  // Use real openclaw data when available, fall back to mock simulation
+  const autoCommands = realCommands ?? mockCommands;
   const [manualCommands, setManualCommands] = useState<AgentCommand[]>([]);
   const [activeCmd, setActiveCmd] = useState<{ agentId: string; action: string } | null>(null);
   const activeCmdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

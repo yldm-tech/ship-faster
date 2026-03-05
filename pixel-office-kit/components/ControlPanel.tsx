@@ -5,17 +5,17 @@ import type { AgentCommand } from './OfficeRoom/OfficeRoom';
 import type { OfficeAgentState } from './OfficeRoom/engine/types';
 
 const ACTIONS: { label: string; action: OfficeAgentState; emoji: string }[] = [
-  { label: 'Work',      action: 'work',      emoji: '💻' },
-  { label: 'Coffee',    action: 'coffee',     emoji: '☕' },
-  { label: 'Lounge',    action: 'lounge',     emoji: '🛋️' },
-  { label: 'Celebrate', action: 'celebrate',  emoji: '🎉' },
+  { label: '工作',  action: 'work',      emoji: '💻' },
+  { label: '休息',  action: 'coffee',    emoji: '☕' },
+  { label: '摸鱼',  action: 'lounge',    emoji: '🛋️' },
+  { label: '庆祝',  action: 'celebrate', emoji: '🎉' },
 ];
 
 const ACTION_MESSAGES: Record<string, string> = {
-  work: 'Focused work...',
-  coffee: 'Coffee break!',
-  lounge: 'Quick break',
-  celebrate: 'Woohoo!',
+  work:      '专注工作中...',
+  coffee:    '喝杯咖啡！',
+  lounge:    '摸会儿鱼',
+  celebrate: '耶！',
 };
 
 interface ControlPanelProps {
@@ -36,7 +36,7 @@ export function ControlPanel({ agents, autoMode, onToggleAuto, onCommand, active
       border: '1px solid #1e293b',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-        <span style={{ color: '#9ca3af', fontSize: 13, fontWeight: 600 }}>Mode:</span>
+        <span style={{ color: '#9ca3af', fontSize: 13, fontWeight: 600 }}>模式：</span>
         <button
           type="button"
           onClick={onToggleAuto}
@@ -52,7 +52,7 @@ export function ControlPanel({ agents, autoMode, onToggleAuto, onCommand, active
             transition: 'all 0.15s',
           }}
         >
-          {autoMode ? 'Auto (running)' : 'Manual'}
+          {autoMode ? '自动（运行中）' : '手动'}
         </button>
       </div>
 
