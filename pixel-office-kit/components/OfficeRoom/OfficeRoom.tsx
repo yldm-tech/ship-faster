@@ -262,7 +262,12 @@ export function OfficeRoom({
             return (
               <div
                 key={`mon-${cfg.id}`}
-                className={`or-monitor-screen ${isAtDesk ? 'or-monitor-active' : 'or-monitor-idle'} ${isFocus ? 'or-monitor-focus' : ''} ${isThinking ? 'or-monitor-think' : ''}`}
+                className={`or-monitor-screen ${
+                  !isAtDesk ? 'or-monitor-idle'
+                  : isThinking ? 'or-monitor-think'
+                  : isFocus ? 'or-monitor-active or-monitor-focus'
+                  : 'or-monitor-active'
+                }`}
                 style={{
                   left: monX * SCALE,
                   top: (monY + 2) * SCALE,
@@ -318,7 +323,7 @@ export function OfficeRoom({
               const isReplying = !!agent.replyFrom;
               const animSeed = hashToUnit(agent.id);
               const isWalking = agent.pathQueue.length > 0;
-              const isSitting = agent.state === 'work' || agent.state === 'deepfocus' || agent.state === 'slack';
+              const isSitting = agent.state === 'work' || agent.state === 'deepfocus' || agent.state === 'slack' || agent.state === 'think';
 
               const walkFrameIdx = WALK_FRAME_SEQ[agent.walkFrame] ?? 0;
               const bodyBgPosX = isWalking ? -(walkFrameIdx * 32) : (isSitting ? -(agent.typeFrame * 32) : 0);

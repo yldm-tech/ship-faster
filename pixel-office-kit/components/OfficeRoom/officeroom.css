@@ -115,14 +115,6 @@
   to { background-position-x: -256px; }
 }
 
-.or-work .or-body {
-  animation: or-work-anim 0.5s steps(2) infinite;
-}
-
-@keyframes or-work-anim {
-  50% { background-position-x: -64px; }
-}
-
 .or-head {
   position: absolute;
   top: 0;
@@ -325,6 +317,10 @@
   animation: or-work-anim 0.4s steps(2) infinite;
 }
 
+@keyframes or-work-anim {
+  50% { background-position-x: -64px; }
+}
+
 .or-think .or-head {
   animation: or-think-sway 2s ease-in-out infinite;
 }
@@ -465,14 +461,30 @@
 }
 
 .or-monitor-think {
-  box-shadow: 0 0 10px rgba(167, 139, 250, 0.5), 0 0 20px rgba(167, 139, 250, 0.2);
-  filter: brightness(1.1) hue-rotate(200deg);
+  background: linear-gradient(
+    180deg,
+    #0d0820 0%, #120a2a 30%, #0d0820 31%,
+    #0d0820 60%, #120a2a 61%, #0d0820 100%
+  );
+  background-size: 100% 12px;
+  opacity: 1;
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.5);
   animation: or-think-pulse 2.4s ease-in-out infinite;
 }
 
 @keyframes or-think-pulse {
-  0%, 100% { box-shadow: 0 0 6px rgba(167, 139, 250, 0.4); }
-  50%       { box-shadow: 0 0 14px rgba(167, 139, 250, 0.7), 0 0 28px rgba(139, 92, 246, 0.3); }
+  0%, 100% { box-shadow: 0 0 6px rgba(139, 92, 246, 0.4); }
+  50%       { box-shadow: 0 0 14px rgba(167, 139, 250, 0.7), 0 0 24px rgba(139, 92, 246, 0.3); }
+}
+
+.or-think .or-body {
+  animation: or-think-body 3s ease-in-out infinite;
+}
+
+@keyframes or-think-body {
+  0%, 100% { transform: scaleX(1) scaleY(1); }
+  30% { transform: scaleX(0.98) scaleY(1.01) translateX(-1px); }
+  70% { transform: scaleX(0.98) scaleY(1.01) translateX(1px); }
 }
 
 .or-steam {

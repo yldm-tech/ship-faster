@@ -188,7 +188,8 @@ function drawDesks(ctx: CanvasRenderingContext2D, agents: AgentEntity[], time: n
     ctx.fillRect(monX, monY + 2, TILE_SIZE, TILE_SIZE * 2 - 4);
 
     const glowAlpha = isActive ? 0.5 + Math.sin(time * 0.003) * 0.2 : 0.15;
-    ctx.fillStyle = hexColorAlpha(ws.color, glowAlpha);
+    const glowColor = isThinking ? hexColorAlpha('#8b5cf6', glowAlpha) : hexColorAlpha(ws.color, glowAlpha);
+    ctx.fillStyle = glowColor;
     ctx.fillRect(monX + 1, monY + 3, TILE_SIZE - 2, TILE_SIZE * 2 - 6);
 
     if (isThinking) {

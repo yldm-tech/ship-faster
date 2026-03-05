@@ -7,6 +7,7 @@ import type { OfficeAgentState } from './OfficeRoom/engine/types';
 const ACTIONS: { label: string; action: OfficeAgentState; emoji: string }[] = [
   { label: '专注',  action: 'deepfocus', emoji: '🔮' },
   { label: '工作',  action: 'work',      emoji: '💻' },
+  { label: '思考',  action: 'think',     emoji: '🤔' },
   { label: '休息',  action: 'coffee',    emoji: '☕' },
   { label: '摸鱼',  action: 'lounge',    emoji: '🛋️' },
   { label: '庆祝',  action: 'celebrate', emoji: '🎉' },
@@ -15,6 +16,7 @@ const ACTIONS: { label: string; action: OfficeAgentState; emoji: string }[] = [
 const ACTION_MESSAGES: Record<string, string> = {
   deepfocus: '深度专注中...',
   work:      '专注工作中...',
+  think:     '深度思考中...',
   coffee:    '喝杯咖啡！',
   lounge:    '摸会儿鱼',
   celebrate: '耶！',

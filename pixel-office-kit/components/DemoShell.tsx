@@ -320,23 +320,31 @@ export function DemoShell() {
               </div>
             ) : activityLog.map(entry => {
               const agent = AGENTS.find(a => a.id === entry.agentId);
+              const dot = actionColor(entry.action);
               return (
                 <div key={entry.id} style={{
                   padding: '5px 12px',
                   display: 'grid',
-                  gridTemplateColumns: '36px 1fr',
-                  gap: 6,
+                  gridTemplateColumns: '32px 8px 1fr',
+                  gap: 5,
                   borderBottom: '1px solid #0d1117',
+                  alignItems: 'start',
                 }}>
-                  <span style={{ color: '#1e293b', fontSize: 9, fontFamily: 'monospace', paddingTop: 2 }}>
+                  <span style={{ color: '#334155', fontSize: 9, fontFamily: 'monospace', paddingTop: 2 }}>
                     {new Date(entry.ts).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
                   </span>
+                  <span style={{
+                    width: 6, height: 6, borderRadius: '50%',
+                    background: dot, display: 'inline-block',
+                    flexShrink: 0, marginTop: 3,
+                    boxShadow: `0 0 4px ${dot}80`,
+                  }} />
                   <div>
                     <span style={{ color: agent?.color ?? '#94a3b8', fontSize: 10, fontWeight: 700 }}>
                       {agent?.name ?? entry.agentId}
                     </span>
                     {' '}
-                    <span style={{ color: '#475569', fontSize: 10 }}>{entry.message}</span>
+                    <span style={{ color: '#64748b', fontSize: 10 }}>{entry.message}</span>
                   </div>
                 </div>
               );
