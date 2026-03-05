@@ -37,10 +37,10 @@ export function DemoShell() {
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 16px' }}>
       <div style={{ textAlign: 'center', marginBottom: 24 }}>
         <h1 style={{ fontSize: 28, fontWeight: 800, color: '#e5e7eb', margin: 0 }}>
-          Pixel Office Kit
+          OpenClaw Team
         </h1>
         <p style={{ color: '#9ca3af', fontSize: 14, marginTop: 4 }}>
-          AI agent pixel office — watch agents work, walk, and collaborate
+          Aria · Neon · Rex · Lyra · Emma · Zeph — live and working
         </p>
         <span style={{
           display: 'inline-block',
@@ -53,7 +53,7 @@ export function DemoShell() {
           fontWeight: 600,
           border: '1px solid #334155',
         }}>
-          DEMO
+          LIVE
         </span>
       </div>
 
