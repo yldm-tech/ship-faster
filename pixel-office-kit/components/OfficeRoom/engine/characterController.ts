@@ -257,7 +257,10 @@ export function tickBehavior(
   const cmd = commandsRef.find(c => c.agentId === agent.id);
   if (cmd) {
     const isManual = (cmd as { manual?: boolean }).manual;
-    const shouldExec = isManual || (agent.state !== 'walk' && Math.random() < 0.004 * dtMs);
+    // idle 立即执行（让 offline agent 安静坐着）；work/deepfocus 提高执行概率
+    const shouldExec = isManual
+      || cmd.action === 'idle'
+      || (agent.state !== 'walk' && Math.random() < 0.010 * dtMs);
     if (shouldExec) {
       agent.isInWanderCycle = false;
       agent.wanderRestTimer = 0;
@@ -271,6 +274,21 @@ export function tickBehavior(
         agent.talkingTo = null;
         agent.emotion = null;
         agent.dwellUntil = Date.now() + 1500;
+      } else if (cmd.action === 'deepfocus') {
+        navigateToSeat(agent, walkable, 'deepfocus');
+        agent.message = cmd.message?.slice(0, 30) ?? pick(workMsgs[agent.id] ?? ['深度专注中...']);
+        agent.talkingTo = null;
+        agent.emotion = null;
+        agent.dwellUntil = Date.now() + 1500;
+      } else if (cmd.action === 'idle') {
+        // offline/未启动 agent：回座位静坐，不参与随机行为
+        navigateToSeat(agent, walkable, 'idle');
+        agent.message = null;
+        agent.talkingTo = null;
+        agent.emotion = null;
+        agent.isInWanderCycle = false;
+        agent.wanderRestTimer = 600000; // 10分钟不随机乱走
+        agent.dwellUntil = Date.now() + 2000;
       } else if (cmd.action === 'coffee') {
         const coffee = COMMON_AREAS.find(a => a.name === 'coffee')!;
         navigateTo(agent, coffee.col + Math.floor(rand(-1, 1)), coffee.row + Math.floor(rand(0, 2)), walkable, 'coffee');
@@ -314,7 +332,11 @@ export function tickBehavior(
     }
   }
 
-  const tempo = activityLevel > 20 ? 0.0020 : activityLevel > 5 ? 0.0010 : 0.0005;
+  // 有真实工作状态命令的 agent，大幅降低随机行为触发频率
+  const hasWorkCmd = cmd && (cmd.action === 'work' || cmd.action === 'deepfocus');
+  const tempo = hasWorkCmd
+    ? (activityLevel > 20 ? 0.0004 : 0.0002)
+    : (activityLevel > 20 ? 0.0020 : activityLevel > 5 ? 0.0010 : 0.0005);
   if (Math.random() < tempo * dtMs) {
     const idle = pickIdleAction();
 
