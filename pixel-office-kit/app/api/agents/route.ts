@@ -2,7 +2,6 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 const STATUS_URL = process.env.OPENCLAW_STATUS_URL ?? 'https://stage.yldm.tech/status';
 
-export const runtime = 'edge';
 export const revalidate = 30;
 
 export async function GET(_req: NextRequest) {
