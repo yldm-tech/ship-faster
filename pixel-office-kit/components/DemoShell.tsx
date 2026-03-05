@@ -74,8 +74,11 @@ export function DemoShell() {
       const s = rawStatus[agent.id];
       if (!s) return;
       const action = inferAction(s.updatedAtMs, s.file, s.initOnly);
-      if (prevActionRef.current[agent.id] === action) return;
-      prevActionRef.current[agent.id] = action;
+      const fileResult = inferFromFile(s.file, Date.now() - s.updatedAtMs);
+      // 用文件推断的具体描述做 diff key，避免同为 work 但实际活动变化时漏记
+      const displayKey = fileResult?.msg ?? action;
+      if (prevActionRef.current[agent.id] === displayKey) return;
+      prevActionRef.current[agent.id] = displayKey;
 
       const msgMap: Record<string, string> = {
         deepfocus: '深度专注中',
@@ -88,7 +91,7 @@ export function DemoShell() {
         id: ++logIdRef.current,
         agentId: agent.id,
         action,
-        message: msgMap[action] ?? action,
+        message: fileResult?.msg ?? msgMap[action] ?? action,
         ts: s.updatedAtMs,
       });
     });
@@ -274,15 +277,17 @@ export function DemoShell() {
                     </span>
                   </div>
 
-                  <div style={{ color: '#334155', fontSize: 10, minHeight: 14 }}>
-                    {s?.initOnly ? '待命中' : s ? timeAgo(s.updatedAtMs) : (isLoading ? '...' : isConnected ? '暂无数据' : '未连接')}
+                  <div style={{ color: isActive ? '#4ade80' : '#334155', fontSize: 10, minHeight: 14 }}>
+                    {s?.initOnly ? '待命中'
+                      : s ? (inferFromFile(s.file, Date.now() - s.updatedAtMs)?.msg ?? timeAgo(s.updatedAtMs))
+                      : (isLoading ? '...' : isConnected ? '暂无数据' : '未连接')}
                   </div>
                   {s?.file && !s.initOnly && (
                     <div style={{
-                      color: isActive ? '#1e4a3a' : '#1e293b', fontSize: 9, marginTop: 3,
+                      color: isActive ? '#1d5c3a' : '#2d3e52', fontSize: 9, marginTop: 3,
                       overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                     }} title={s.file}>
-                      📄 {s.file.split('/').pop()}
+                      {s.file.split('/').pop()} · {timeAgo(s.updatedAtMs)}
                     </div>
                   )}
                 </div>
