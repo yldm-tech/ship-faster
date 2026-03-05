@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import { AGENTS, WORK_MSGS, LOUNGE_MSGS } from './agents';
 import type { AgentCommand } from '@/components/OfficeRoom/OfficeRoom';
 
-const ACTIVE_THRESHOLD_MS = 10 * 60 * 1000;   // 10 分钟内 → 工作中
-const IDLE_THRESHOLD_MS   = 60 * 60 * 1000;   // 60 分钟内 → 摸鱼中
-const POLL_INTERVAL_MS    = 30 * 1000;         // 每 30 秒轮询
+export const ACTIVE_THRESHOLD_MS = 10 * 60 * 1000;   // 10 分钟内 → 工作中
+export const IDLE_THRESHOLD_MS   = 60 * 60 * 1000;   // 60 分钟内 → 摸鱼中
+const POLL_INTERVAL_MS    = 30 * 1000;                // 每 30 秒轮询
 
 export type RawAgentStatus = Record<string, { updatedAtMs: number; file?: string; initOnly?: boolean }>;
 

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { OfficeRoom } from './OfficeRoom/OfficeRoom';
 import { ControlPanel } from './ControlPanel';
 import { AGENTS, WORK_MSGS, PERSONALITY_BANTER, COFFEE_MSGS, CELEBRATE_MSGS, LOUNGE_MSGS } from '@/lib/agents';
-import { useOpenclawStatus, inferFromFile } from '@/lib/openclaw-status';
+import { useOpenclawStatus, inferFromFile, ACTIVE_THRESHOLD_MS } from '@/lib/openclaw-status';
 import type { AgentCommand } from './OfficeRoom/OfficeRoom';
 
 interface LogEntry {
@@ -45,9 +45,9 @@ function inferAction(updatedAtMs: number, file?: string, initOnly?: boolean): st
   if (initOnly) return 'idle';
   const age = Date.now() - updatedAtMs;
   const fromFile = inferFromFile(file, age);
-  if (fromFile && age < 10 * 60 * 1000) return fromFile.action;
+  if (fromFile && age < ACTIVE_THRESHOLD_MS) return fromFile.action;
   if (age < 2 * 60 * 1000) return 'deepfocus';
-  if (age < 10 * 60 * 1000) return 'work';
+  if (age < ACTIVE_THRESHOLD_MS) return 'work';
   if (age < 60 * 60 * 1000) return 'lounge';
   return 'coffee';
 }
