@@ -1,18 +1,20 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { AGENTS, WORK_MSGS, CELEBRATE_MSGS, LOUNGE_MSGS } from './agents';
+import { AGENTS, WORK_MSGS, LOUNGE_MSGS } from './agents';
 import type { AgentCommand } from '@/components/OfficeRoom/OfficeRoom';
 
-// How many ms since last activity to consider an agent "working"
-const ACTIVE_THRESHOLD_MS = 10 * 60 * 1000;   // 10 min
-const IDLE_THRESHOLD_MS   = 60 * 60 * 1000;   // 60 min
-const POLL_INTERVAL_MS    = 60 * 1000;         // poll every 60s
+const ACTIVE_THRESHOLD_MS = 10 * 60 * 1000;   // 10 分钟内 → 工作中
+const IDLE_THRESHOLD_MS   = 60 * 60 * 1000;   // 60 分钟内 → 摸鱼中
+const POLL_INTERVAL_MS    = 30 * 1000;         // 每 30 秒轮询
 
-interface AgentStatus {
-  updatedAtMs: number;  // Unix ms
+export type RawAgentStatus = Record<string, { updatedAtMs: number }>;
+
+export interface OpenclawStatusResult {
+  commands: AgentCommand[];
+  rawStatus: RawAgentStatus | null;
+  isConnected: boolean;
 }
-type StatusResponse = Record<string, AgentStatus>;
 
 function pick<T>(arr: readonly T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
@@ -22,66 +24,49 @@ function statusToCommand(agentId: string, updatedAtMs: number): AgentCommand {
   const age = Date.now() - updatedAtMs;
 
   if (age < ACTIVE_THRESHOLD_MS) {
-    // Recently active → working
-    const msgs = WORK_MSGS[agentId] ?? ['Working...'];
-    return { agentId, action: 'work', message: pick(msgs) };
+    return { agentId, action: 'work', message: pick(WORK_MSGS[agentId] ?? ['工作中...']) };
   }
-
   if (age < IDLE_THRESHOLD_MS) {
-    // Idle → lounge
-    const msgs = LOUNGE_MSGS[agentId] ?? ['休息中...'];
-    return { agentId, action: 'lounge', message: pick(msgs) };
+    return { agentId, action: 'lounge', message: pick(LOUNGE_MSGS[agentId] ?? ['休息中...']) };
   }
-
-  // Very idle → coffee or lounge
-  const action = Math.random() < 0.3 ? 'coffee' : 'lounge';
-  if (action === 'coffee') {
-    return { agentId, action: 'coffee', message: '☕ 喝杯咖啡' };
-  }
-  const msgs = LOUNGE_MSGS[agentId] ?? ['休息中...'];
-  return { agentId, action: 'lounge', message: pick(msgs) };
+  return { agentId, action: 'coffee', message: '☕ 喝杯咖啡' };
 }
 
-async function fetchStatus(): Promise<StatusResponse | null> {
+async function fetchStatus(): Promise<RawAgentStatus | null> {
   try {
     const res = await fetch('/api/agents', { cache: 'no-store' });
     if (!res.ok) return null;
     const data = await res.json();
     if (data.error) return null;
-    return data as StatusResponse;
+    return data as RawAgentStatus;
   } catch {
     return null;
   }
 }
 
-/**
- * Polls the real openclaw status API and returns commands for all agents.
- * Returns null when openclaw data is unavailable (caller should fall back to mock).
- */
-export function useOpenclawStatus(enabled: boolean): AgentCommand[] | null {
-  const [commands, setCommands] = useState<AgentCommand[] | null>(null);
+/** 轮询真实 openclaw 状态，始终启用 */
+export function useOpenclawStatus(): OpenclawStatusResult {
+  const [result, setResult] = useState<OpenclawStatusResult>({
+    commands: [],
+    rawStatus: null,
+    isConnected: false,
+  });
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    if (!enabled) {
-      setCommands(null);
-      if (timerRef.current) clearInterval(timerRef.current);
-      return;
-    }
-
     const tick = async () => {
       const status = await fetchStatus();
+
       if (!status) {
-        setCommands(null);
+        setResult(prev => ({ ...prev, isConnected: false, rawStatus: null }));
         return;
       }
 
-      // Emit one command per known agent based on their last activity
       const cmds: AgentCommand[] = AGENTS
         .filter(a => status[a.id]?.updatedAtMs)
         .map(a => statusToCommand(a.id, status[a.id].updatedAtMs));
 
-      // Also add a random talk event between two recently-active agents
+      // 让活跃的 Agent 之间产生一次沟通动画
       const active = AGENTS.filter(a => {
         const s = status[a.id];
         return s && Date.now() - s.updatedAtMs < ACTIVE_THRESHOLD_MS;
@@ -89,19 +74,16 @@ export function useOpenclawStatus(enabled: boolean): AgentCommand[] | null {
       if (active.length >= 2) {
         const talker = pick(active);
         const target = pick(active.filter(a => a.id !== talker.id));
-        cmds.push({ agentId: talker.id, action: 'talk', message: 'Sync', targetAgentId: target.id });
+        cmds.push({ agentId: talker.id, action: 'talk', message: '快速同步', targetAgentId: target.id });
       }
 
-      setCommands(cmds.length > 0 ? cmds : null);
+      setResult({ commands: cmds, rawStatus: status, isConnected: true });
     };
 
     tick();
     timerRef.current = setInterval(tick, POLL_INTERVAL_MS);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, []);
 
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [enabled]);
-
-  return commands;
+  return result;
 }

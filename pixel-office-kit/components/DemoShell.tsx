@@ -4,15 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { OfficeRoom } from './OfficeRoom/OfficeRoom';
 import { ControlPanel } from './ControlPanel';
 import { AGENTS, WORK_MSGS, PERSONALITY_BANTER, COFFEE_MSGS, CELEBRATE_MSGS, LOUNGE_MSGS } from '@/lib/agents';
-import { useDemoSimulation } from '@/lib/mock-simulation';
 import { useOpenclawStatus } from '@/lib/openclaw-status';
 import type { AgentCommand } from './OfficeRoom/OfficeRoom';
-
-interface AgentSnapshot {
-  action: string;
-  message: string;
-  updatedAt: number;
-}
 
 interface LogEntry {
   id: number;
@@ -33,7 +26,7 @@ function actionLabel(action: string): string {
   const map: Record<string, string> = {
     work: '工作中', deepfocus: '专注中', coffee: '休息中',
     lounge: '摸鱼中', celebrate: '庆祝！', talk: '沟通中',
-    wave: '打招呼', idle: '待机',
+    wave: '打招呼', idle: '待机', offline: '离线',
   };
   return map[action] ?? action;
 }
@@ -42,83 +35,75 @@ function actionColor(action: string): string {
   const map: Record<string, string> = {
     work: '#22c55e', deepfocus: '#10b981', coffee: '#f59e0b',
     lounge: '#6b7280', celebrate: '#ec4899', talk: '#06b6d4',
-    wave: '#8b5cf6', idle: '#374151',
+    wave: '#8b5cf6', idle: '#374151', offline: '#1e293b',
   };
   return map[action] ?? '#4b5563';
 }
 
-const LOG_ACTIONS = new Set(['work', 'deepfocus', 'celebrate', 'talk']);
+/** 根据 updatedAtMs 推断当前状态 */
+function inferAction(updatedAtMs: number): string {
+  const age = Date.now() - updatedAtMs;
+  if (age < 10 * 60 * 1000) return 'work';
+  if (age < 60 * 60 * 1000) return 'lounge';
+  return 'coffee';
+}
 
 export function DemoShell() {
-  const [autoMode, setAutoMode] = useState(true);
-  const mockCommands = useDemoSimulation(autoMode);
-  const realCommands = useOpenclawStatus(autoMode);
-  const isRealData = realCommands !== null;
-  const autoCommands = realCommands ?? mockCommands;
+  const { commands: realCommands, rawStatus, isConnected } = useOpenclawStatus();
   const [manualCommands, setManualCommands] = useState<AgentCommand[]>([]);
   const [activeCmd, setActiveCmd] = useState<{ agentId: string; action: string } | null>(null);
   const activeCmdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [agentSnapshot, setAgentSnapshot] = useState<Record<string, AgentSnapshot>>({});
   const [activityLog, setActivityLog] = useState<LogEntry[]>([]);
   const [eventCount, setEventCount] = useState(0);
   const logIdRef = useRef(0);
-  // Track prev messages per agent to avoid duplicate log entries
-  const prevMsgRef = useRef<Record<string, string>>({});
+  // 追踪每个 agent 上次记录的 action，避免无变化时刷屏
+  const prevActionRef = useRef<Record<string, string>>({});
 
-  const commands = autoMode ? autoCommands : manualCommands;
-
-  // Update snapshot and activity log whenever commands change
+  // 监听 rawStatus 变化：仅在 action 发生转变时写入日志
   useEffect(() => {
-    if (!commands || commands.length === 0) return;
+    if (!rawStatus) return;
     const now = Date.now();
     const newEntries: LogEntry[] = [];
 
-    setAgentSnapshot(prev => {
-      const next = { ...prev };
-      commands.forEach(cmd => {
-        next[cmd.agentId] = { action: cmd.action, message: cmd.message ?? '', updatedAt: now };
+    AGENTS.forEach(agent => {
+      const s = rawStatus[agent.id];
+      if (!s) return;
+      const action = inferAction(s.updatedAtMs);
+      if (prevActionRef.current[agent.id] === action) return;
+      prevActionRef.current[agent.id] = action;
 
-        // Add to log only for interesting actions with changed messages
-        if (LOG_ACTIONS.has(cmd.action)) {
-          const key = `${cmd.agentId}:${cmd.message}`;
-          if (prevMsgRef.current[cmd.agentId] !== key) {
-            prevMsgRef.current[cmd.agentId] = key;
-            newEntries.push({
-              id: ++logIdRef.current,
-              agentId: cmd.agentId,
-              action: cmd.action,
-              message: cmd.message ?? '',
-              ts: now,
-            });
-          }
-        }
+      const msgMap: Record<string, string> = {
+        work: '开始工作',
+        lounge: '进入摸鱼模式',
+        coffee: '去喝咖啡了',
+      };
+      newEntries.push({
+        id: ++logIdRef.current,
+        agentId: agent.id,
+        action,
+        message: msgMap[action] ?? action,
+        ts: s.updatedAtMs,
       });
-      return next;
     });
 
     if (newEntries.length > 0) {
       setEventCount(c => c + newEntries.length);
       setActivityLog(prev => [...newEntries, ...prev].slice(0, 30));
     }
-  }, [commands]);
+  }, [rawStatus]);
 
   const handleManualCommand = (cmd: AgentCommand) => {
-    const manualCmd = { ...cmd, manual: true } as AgentCommand & { manual: boolean };
-    setManualCommands(prev => [...prev, manualCmd]);
+    setManualCommands(prev => [...prev.slice(-5), cmd]);
     setActiveCmd({ agentId: cmd.agentId, action: cmd.action });
 
     const now = Date.now();
-    setAgentSnapshot(prev => ({
-      ...prev,
-      [cmd.agentId]: { action: cmd.action, message: cmd.message ?? '', updatedAt: now },
-    }));
     setEventCount(c => c + 1);
     setActivityLog(prev => [{
       id: ++logIdRef.current,
       agentId: cmd.agentId,
       action: cmd.action,
-      message: cmd.message ?? '',
+      message: `[手动] ${cmd.message ?? ''}`,
       ts: now,
     }, ...prev].slice(0, 30));
 
@@ -130,14 +115,18 @@ export function DemoShell() {
   };
 
   useEffect(() => {
-    return () => {
-      if (activeCmdTimerRef.current) clearTimeout(activeCmdTimerRef.current);
-    };
+    return () => { if (activeCmdTimerRef.current) clearTimeout(activeCmdTimerRef.current); };
   }, []);
 
-  const activeCount = Object.values(agentSnapshot).filter(
-    s => s.action === 'work' || s.action === 'deepfocus'
-  ).length;
+  // OfficeRoom 同时接收真实命令 + 最近手动命令
+  const officeCommands = [...realCommands, ...manualCommands.slice(-3)];
+
+  const activeCount = rawStatus
+    ? AGENTS.filter(a => {
+        const s = rawStatus[a.id];
+        return s && Date.now() - s.updatedAtMs < 10 * 60 * 1000;
+      }).length
+    : 0;
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 16px', fontFamily: 'ui-monospace, monospace' }}>
@@ -149,18 +138,18 @@ export function DemoShell() {
             OpenClaw 团队工作台
           </h1>
           <p style={{ color: '#64748b', fontSize: 12, marginTop: 5, marginBottom: 0, lineHeight: 1.6 }}>
-            6 个 AI Agent 实时协同工作 · 基于文件系统活跃度追踪
+            6 个 AI Agent 实时协同工作 · 基于文件系统活跃度追踪 · 每 30 秒更新
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
           <span style={{
             padding: '3px 10px', borderRadius: 20,
-            background: isRealData ? '#052e16' : '#1c1917',
-            color: isRealData ? '#4ade80' : '#78716c',
+            background: isConnected ? '#052e16' : '#1c1917',
+            color: isConnected ? '#4ade80' : '#ef4444',
             fontSize: 10, fontWeight: 700,
-            border: `1px solid ${isRealData ? '#166534' : '#44403c'}`,
+            border: `1px solid ${isConnected ? '#166534' : '#7f1d1d'}`,
           }}>
-            {isRealData ? '● 真实数据' : '● 模拟演示'}
+            {isConnected ? '● 已连接' : '● 未连接'}
           </span>
           <span style={{
             padding: '3px 10px', borderRadius: 20,
@@ -172,12 +161,22 @@ export function DemoShell() {
         </div>
       </div>
 
+      {/* ── 未连接提示 ── */}
+      {!isConnected && (
+        <div style={{
+          marginBottom: 16, padding: '12px 16px', borderRadius: 10,
+          background: '#1c0a00', border: '1px solid #7c2d12', color: '#fb923c', fontSize: 12,
+        }}>
+          ⚠️ 无法连接到 openclaw stage server（stage.yldm.ai/status）。请按照 <code>scripts/SETUP.md</code> 完成 macmini 配置。
+        </div>
+      )}
+
       {/* ── Stats bar ── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 16 }}>
         {[
-          { label: '当前活跃', value: `${activeCount} / 6`, sub: '名 Agent 工作中' },
-          { label: '今日事件', value: String(eventCount), sub: '次活动已记录' },
-          { label: '数据来源', value: isRealData ? 'Openclaw' : 'Mock', sub: isRealData ? '实时文件系统' : '随机模拟' },
+          { label: '当前活跃', value: isConnected ? `${activeCount} / 6` : '—', sub: '名 Agent 工作中（10 分钟内）' },
+          { label: '状态切换', value: String(eventCount), sub: '次状态变化已记录' },
+          { label: '轮询间隔', value: '30s', sub: isConnected ? 'stage.yldm.ai/status' : '等待连接...' },
         ].map(stat => (
           <div key={stat.label} style={{
             background: '#0f172a', border: '1px solid #1e293b', borderRadius: 10, padding: '12px 16px',
@@ -197,7 +196,7 @@ export function DemoShell() {
           agents={AGENTS}
           isActive={true}
           activityLevel={10}
-          agentCommands={commands}
+          agentCommands={officeCommands}
           workMsgs={WORK_MSGS}
           personalityBanter={PERSONALITY_BANTER}
           coffeeMsgs={COFFEE_MSGS}
@@ -209,16 +208,17 @@ export function DemoShell() {
       {/* ── Agent Cards + Activity Log ── */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 12, marginBottom: 16 }}>
 
-        {/* Agent status cards */}
+        {/* Agent status cards — 直接读 rawStatus 真实时间戳 */}
         <div>
           <div style={{ color: '#475569', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
             Agent 状态
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
             {AGENTS.map(agent => {
-              const snap = agentSnapshot[agent.id];
-              const isActive = snap?.action === 'work' || snap?.action === 'deepfocus';
-              const dotColor = snap ? actionColor(snap.action) : '#1e293b';
+              const s = rawStatus?.[agent.id];
+              const action = s ? inferAction(s.updatedAtMs) : 'offline';
+              const isActive = action === 'work' || action === 'deepfocus';
+              const dotColor = actionColor(action);
 
               return (
                 <div key={agent.id} style={{
@@ -228,7 +228,6 @@ export function DemoShell() {
                   padding: '11px 13px',
                   position: 'relative',
                   overflow: 'hidden',
-                  transition: 'border-color 0.3s',
                 }}>
                   {isActive && (
                     <div style={{
@@ -237,7 +236,6 @@ export function DemoShell() {
                     }} />
                   )}
 
-                  {/* Name + avatar row */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 9 }}>
                     <img
                       src={agent.avatar}
@@ -252,7 +250,6 @@ export function DemoShell() {
                     </div>
                   </div>
 
-                  {/* Status */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
                     <span style={{
                       width: 6, height: 6, borderRadius: '50%',
@@ -260,25 +257,13 @@ export function DemoShell() {
                       boxShadow: isActive ? `0 0 6px ${dotColor}` : 'none',
                     }} />
                     <span style={{ color: dotColor, fontSize: 10, fontWeight: 600 }}>
-                      {snap ? actionLabel(snap.action) : '待机'}
+                      {actionLabel(action)}
                     </span>
                   </div>
 
-                  {/* Last message */}
-                  <div style={{
-                    color: '#334155', fontSize: 10, lineHeight: 1.3,
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    minHeight: 14,
-                  }}>
-                    {snap?.message ?? '—'}
+                  <div style={{ color: '#334155', fontSize: 10, minHeight: 14 }}>
+                    {s ? timeAgo(s.updatedAtMs) : (isConnected ? '暂无数据' : '未连接')}
                   </div>
-
-                  {/* Time ago */}
-                  {snap?.updatedAt && (
-                    <div style={{ color: '#1e293b', fontSize: 9, marginTop: 3 }}>
-                      {timeAgo(snap.updatedAt)}
-                    </div>
-                  )}
                 </div>
               );
             })}
@@ -288,7 +273,7 @@ export function DemoShell() {
         {/* Activity log */}
         <div>
           <div style={{ color: '#475569', fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
-            实时动态
+            状态变化记录
           </div>
           <div style={{
             background: '#0f172a', border: '1px solid #1e293b', borderRadius: 10,
@@ -296,7 +281,7 @@ export function DemoShell() {
           }}>
             {activityLog.length === 0 ? (
               <div style={{ color: '#1e293b', fontSize: 11, textAlign: 'center', paddingTop: 70 }}>
-                等待活动事件…
+                {isConnected ? '等待状态变化...' : '未连接'}
               </div>
             ) : activityLog.map(entry => {
               const agent = AGENTS.find(a => a.id === entry.agentId);
@@ -306,9 +291,9 @@ export function DemoShell() {
                   display: 'grid',
                   gridTemplateColumns: '36px 1fr',
                   gap: 6,
-                  borderBottom: '1px solid #0f172a',
+                  borderBottom: '1px solid #0d1117',
                 }}>
-                  <span style={{ color: '#1e293b', fontSize: 9, fontFamily: 'monospace', paddingTop: 2, flexShrink: 0 }}>
+                  <span style={{ color: '#1e293b', fontSize: 9, fontFamily: 'monospace', paddingTop: 2 }}>
                     {new Date(entry.ts).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
                   </span>
                   <div>
@@ -316,9 +301,7 @@ export function DemoShell() {
                       {agent?.name ?? entry.agentId}
                     </span>
                     {' '}
-                    <span style={{ color: '#475569', fontSize: 10 }}>
-                      {entry.message}
-                    </span>
+                    <span style={{ color: '#475569', fontSize: 10 }}>{entry.message}</span>
                   </div>
                 </div>
               );
@@ -330,8 +313,6 @@ export function DemoShell() {
       {/* ── Control Panel ── */}
       <ControlPanel
         agents={AGENTS}
-        autoMode={autoMode}
-        onToggleAuto={() => setAutoMode(v => !v)}
         onCommand={handleManualCommand}
         activeCmd={activeCmd}
       />
