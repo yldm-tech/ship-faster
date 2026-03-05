@@ -8,7 +8,7 @@ const ACTIVE_THRESHOLD_MS = 10 * 60 * 1000;   // 10 分钟内 → 工作中
 const IDLE_THRESHOLD_MS   = 60 * 60 * 1000;   // 60 分钟内 → 摸鱼中
 const POLL_INTERVAL_MS    = 30 * 1000;         // 每 30 秒轮询
 
-export type RawAgentStatus = Record<string, { updatedAtMs: number; file?: string }>;
+export type RawAgentStatus = Record<string, { updatedAtMs: number; file?: string; initOnly?: boolean }>;
 
 export interface OpenclawStatusResult {
   commands: AgentCommand[];
@@ -68,13 +68,18 @@ export function useOpenclawStatus(): OpenclawStatusResult {
       }
 
       const cmds: AgentCommand[] = AGENTS
-        .filter(a => status[a.id]?.updatedAtMs)
+        .filter(a => status[a.id]?.updatedAtMs && !status[a.id].initOnly)
         .map(a => statusToCommand(a.id, status[a.id].updatedAtMs));
+
+      // initOnly agent → 发送 offline 命令让他们坐在位置上不动
+      AGENTS.filter(a => status[a.id]?.initOnly).forEach(a => {
+        cmds.push({ agentId: a.id, action: 'idle', message: '未启动' });
+      });
 
       // 让活跃的 Agent 之间产生一次沟通动画
       const active = AGENTS.filter(a => {
         const s = status[a.id];
-        return s && Date.now() - s.updatedAtMs < ACTIVE_THRESHOLD_MS;
+        return s && !s.initOnly && Date.now() - s.updatedAtMs < ACTIVE_THRESHOLD_MS;
       });
       if (active.length >= 2) {
         const talker = pick(active);

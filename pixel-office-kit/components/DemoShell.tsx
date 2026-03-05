@@ -40,8 +40,9 @@ function actionColor(action: string): string {
   return map[action] ?? '#4b5563';
 }
 
-/** 根据 updatedAtMs 推断当前状态 */
-function inferAction(updatedAtMs: number): string {
+/** 根据 updatedAtMs 和 initOnly 推断当前状态 */
+function inferAction(updatedAtMs: number, initOnly?: boolean): string {
+  if (initOnly) return 'offline';                   // 工作区只有初始化文件 → 进程未启动
   const age = Date.now() - updatedAtMs;
   if (age < 2 * 60 * 1000) return 'deepfocus';   // 2 分钟内：深度专注
   if (age < 10 * 60 * 1000) return 'work';        // 10 分钟内：工作中
@@ -70,7 +71,7 @@ export function DemoShell() {
     AGENTS.forEach(agent => {
       const s = rawStatus[agent.id];
       if (!s) return;
-      const action = inferAction(s.updatedAtMs);
+      const action = inferAction(s.updatedAtMs, s.initOnly);
       if (prevActionRef.current[agent.id] === action) return;
       prevActionRef.current[agent.id] = action;
 
@@ -218,7 +219,7 @@ export function DemoShell() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
             {AGENTS.map(agent => {
               const s = rawStatus?.[agent.id];
-              const action = s ? inferAction(s.updatedAtMs) : 'offline';
+              const action = s ? inferAction(s.updatedAtMs, s.initOnly) : 'offline';
               const isActive = action === 'work' || action === 'deepfocus';
               const dotColor = actionColor(action);
 
