@@ -17,39 +17,39 @@ export const AGENTS: AgentDef[] = [
 ];
 
 export const WORK_MSGS: Record<string, string[]> = {
-  aria:  ['Writing specs...', 'Prioritizing backlog', 'Defining acceptance criteria', 'Reviewing PRD'],
-  neon:  ['Building UI...', 'Fixing styles', 'Component review', 'Integrating API'],
-  rex:   ['Deploying infra...', 'Checking k8s pods', 'CI pipeline running', 'Monitoring alerts'],
-  lyra:  ['Running test suite...', 'Found an edge case', 'Writing test plan', 'Verifying fix'],
-  emma:  ['Pushing to Vercel...', 'GitHub Actions running', 'Deploy checklist', 'Preview URL ready'],
-  zeph:  ['Designing schema...', 'Architecture review', 'Tech stack decision', 'API boundary'],
+  aria:  ['撰写需求文档...', '整理产品 Backlog', '定义验收标准', '审查 PRD 中'],
+  neon:  ['搭建 UI 组件...', '调试样式', '组件代码审查', '对接 API 中'],
+  rex:   ['部署基础设施...', '检查 k8s 状态', 'CI 流水线运行中', '处理监控告警'],
+  lyra:  ['运行测试套件...', '发现边界 case', '编写测试计划', '验证修复结果'],
+  emma:  ['推送到 Vercel...', 'GitHub Actions 运行中', '执行部署清单', '预览链接就绪'],
+  zeph:  ['设计数据库 Schema...', '进行架构评审', '技术选型讨论', '定义 API 边界'],
 };
 
 export const PERSONALITY_BANTER: Record<string, string[]> = {
-  aria:  ['Scope creep detected', 'Need acceptance criteria', 'Backlog grooming', 'User story ready'],
-  neon:  ['This animation is smooth', 'CSS is fine art', 'Mobile looks good', 'Bundle size check'],
-  rex:   ['Infra is stable', 'No incidents today', 'Automated that toil', 'GitOps all the way'],
-  lyra:  ['Found a regression', 'Edge case scenario', 'Test coverage up', 'Quality gate passed'],
-  emma:  ['Deployment successful', 'Preview URL live', 'Zero downtime deploy', 'CI passed ✓'],
-  zeph:  ['Architecture decision', 'Next.js 15 migration', 'Server component boundary', 'Data model solid'],
+  aria:  ['检测到需求蔓延', '需要补充验收标准', 'Backlog 梳理完毕', '用户故事已就绪'],
+  neon:  ['动画好丝滑', 'CSS 是一门艺术', '移动端适配不错', '检查打包体积'],
+  rex:   ['基础设施稳定', '今天零故障', '重复操作已自动化', 'GitOps 一把梭'],
+  lyra:  ['发现了回归问题', '边界场景分析', '测试覆盖率提升了', '质量门禁通过'],
+  emma:  ['部署成功上线', '预览地址已激活', '零停机部署完成', 'CI 全部通过 ✓'],
+  zeph:  ['架构决策完成', 'Next.js 15 迁移中', '服务端组件边界明确', '数据模型稳固'],
 };
 
-export const COFFEE_MSGS: string[] = ['☕ Ahh...', 'Coffee time!', 'Need caffeine', 'Refueling...'];
+export const COFFEE_MSGS: string[] = ['☕ 啊...', '喝杯咖啡！', '需要补充咖啡因', '续命中...'];
 
 export const CELEBRATE_MSGS: Record<string, string[]> = {
-  aria:  ['Shipped on time!', 'Sprint complete!', 'Goal achieved!'],
-  neon:  ['Looks perfect!', 'UI approved!', 'Clean component!'],
-  rex:   ['Zero downtime!', 'Infra stable!', 'Deployed!'],
-  lyra:  ['All tests pass!', 'No regressions!', 'Quality A+!'],
-  emma:  ['Live in prod!', 'Deploy done!', 'URL is up!'],
-  zeph:  ['Architecture approved!', 'Schema solid!', 'Design done!'],
+  aria:  ['按时交付！', 'Sprint 完成！', '目标达成！'],
+  neon:  ['效果完美！', 'UI 审查通过！', '组件真香！'],
+  rex:   ['零停机！', '基础设施稳！', '部署成功！'],
+  lyra:  ['全部测试通过！', '零回归问题！', '质量 A+！'],
+  emma:  ['已上生产！', '部署完成！', '链接可访问！'],
+  zeph:  ['架构通过审批！', 'Schema 稳了！', '设计完成！'],
 };
 
 export const LOUNGE_MSGS: Record<string, string[]> = {
-  aria:  ['Reviewing roadmap...', 'Thinking strategy', 'Quiet planning...'],
-  neon:  ['Browsing Dribbble', 'Getting inspired', 'Design exploration'],
-  rex:   ['Reading dashboards', 'Passive monitoring', 'Watching metrics'],
-  lyra:  ['Contemplating edge cases', 'In review mode', 'Methodical rest'],
-  emma:  ['Watching deploy logs', 'CI status check', 'Pipeline idle'],
-  zeph:  ['System thinking...', 'Architecture sketch', 'Deep design mode'],
+  aria:  ['回顾产品路线图...', '思考战略方向', '静静规划中...'],
+  neon:  ['刷 Dribbble 找灵感', '沉浸在设计美学里', '探索新的设计风格'],
+  rex:   ['盯着监控面板', '被动观察中', '看指标发呆'],
+  lyra:  ['思考边界条件...', '代码审查模式', '有序地休息中'],
+  emma:  ['看部署日志', '检查 CI 状态', '流水线空闲中'],
+  zeph:  ['系统性思考...', '草画架构图', '深度设计模式'],
 };

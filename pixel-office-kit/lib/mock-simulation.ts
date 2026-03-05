@@ -6,10 +6,10 @@ import type { OfficeAgentState } from '@/components/OfficeRoom/engine/types';
 import type { AgentCommand } from '@/components/OfficeRoom/OfficeRoom';
 
 const ACTIONS: { action: OfficeAgentState; message: string }[] = [
-  { action: 'work', message: 'Focused work...' },
-  { action: 'coffee', message: 'Coffee break!' },
-  { action: 'lounge', message: 'Quick break' },
-  { action: 'celebrate', message: 'Milestone!' },
+  { action: 'work', message: '专注工作中...' },
+  { action: 'coffee', message: '喝杯咖啡！' },
+  { action: 'lounge', message: '摸会儿鱼' },
+  { action: 'celebrate', message: '里程碑达成！' },
 ];
 
 function pick<T>(arr: readonly T[]): T {
@@ -37,7 +37,7 @@ export function useDemoSimulation(enabled: boolean): AgentCommand[] {
         setCommands([{
           agentId: agent.id,
           action: 'talk',
-          message: 'Quick sync',
+          message: '快速同步一下',
           targetAgentId: target.id,
         }]);
       } else {
